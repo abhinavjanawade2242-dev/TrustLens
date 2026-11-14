@@ -1,10 +1,21 @@
-node_modules
-dist
+﻿# Frontend
+node_modules/
+dist/
+.vite/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Environment secrets
 .env
 .env.local
 .env.*.local
+
+# Logs and system files
 *.log
 __pycache__/
 *.py[cod]
 .DS_Store
-.vite
