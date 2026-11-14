@@ -3,10 +3,23 @@
 > **"Don't Trust the Message. Verify It."**  
 > AI-powered phishing, scam, malicious URL, and suspicious message detection platform.
 
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
+[![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?logo=render&logoColor=black)](https://trustlens-backend-wk7c.onrender.com)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
+
 ---
 
 ## 🌐 Overview
 **TrustLens** is a commercial-grade cybersecurity web application built for everyday internet users, students, security analysts, and enterprise teams. It dismantles deceptive social engineering lures, typosquatted brand domains, fake urgent invoices, and adversary-in-the-middle OTP stealers with forensic precision.
+
+### 🔗 Live Production Endpoints
+* **Backend Gateway (Render):** [`https://trustlens-backend-wk7c.onrender.com`](https://trustlens-backend-wk7c.onrender.com)
+* **Health Check Probe:** [`https://trustlens-backend-wk7c.onrender.com/api/health`](https://trustlens-backend-wk7c.onrender.com/api/health)
+* **Interactive Swagger Docs:** [`https://trustlens-backend-wk7c.onrender.com/docs`](https://trustlens-backend-wk7c.onrender.com/docs)
+* **API Specifications:** OpenAPI 3.1 strictly conforming to `shared/sample-threat.json`
 
 ---
 
@@ -66,11 +79,13 @@ Detailed risk decomposition breaking down:
 ---
 
 ## 🛠️ Technology Stack
-- **Framework:** React 18 + Vite 5
-- **Styling:** Tailwind CSS (deep midnight navy palette, glassmorphism, cyan/blue cyber accents)
-- **Icons:** Lucide React
-- **Animations:** Custom CSS keyframes, SVG radial gauge transitions, radar sweep
-- **Network / API:** Fetch API with AbortController for cancelable requests
+* **Frontend:** React 18, Vite 5, Tailwind CSS, Lucide Icons, Recharts, Framer Motion
+* **Backend Orchestrator:** Python 3.12, FastAPI, Uvicorn, Pydantic v2, Python-Multipart
+* **AI & Multimodal Ingestion:** Google GenAI SDK (`google-genai`), Gemini 3.5 Flash Lite, OpenCV Headless (QR detection), Pillow
+* **Deterministic Safety Layer:** Pure Python Levenshtein distance typosquatting engine, apex domain structural parsers, top 50 impersonated brand dictionary (<50ms latency)
+* **Cloud & Hosting:**
+  * **Backend:** [Render](https://render.com) Web Service with automated Blueprint (`render.yaml`)
+  * **Frontend:** [Vercel](https://vercel.com) with client-side SPA routing (`frontend/vercel.json`)
 
 ---
 
@@ -166,13 +181,42 @@ python -m pytest
 
 ---
 
+## ☁️ Cloud Deployment Guide (Render + Vercel)
+
+TrustLens is architected for decoupled, continuous cloud deployment with zero downtime:
+
+### 1. Backend Web Service on Render (FastAPI)
+The repository contains an automated [Render Blueprint (`render.yaml`)](render.yaml) for 1-click deployment:
+* **Runtime:** Python 3.12
+* **Build Command:** `pip install -r backend/requirements.txt`
+* **Start Command:** `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+* **Health Check Path:** `/api/health`
+* **Environment Variables:**
+  * `GEMINI_API_KEY`: Google AI Studio API key.
+  * `GEMINI_MODEL`: `gemini-3.5-flash-lite`.
+  * `TRUSTLENS_ALLOWED_ORIGINS`: `*` (or your Vercel URL to restrict access).
+  * `PYTHON_VERSION`: `3.12.0`.
+* **Live Service URL:** [`https://trustlens-backend-wk7c.onrender.com`](https://trustlens-backend-wk7c.onrender.com)
+
+### 2. Frontend Web Client on Vercel (React + Vite)
+* **Framework Preset:** Vite
+* **Root Directory:** `frontend` *(⚠️ Crucial: set to `frontend`, not repository root)*
+* **Build Command:** `npm run build`
+* **Output Directory:** `dist`
+* **Routing Configuration:** [`frontend/vercel.json`](frontend/vercel.json) handles client-side SPA route rewrites.
+* **Environment Variables:**
+  * `VITE_API_URL`: `https://trustlens-backend-wk7c.onrender.com` *(Must start with `https://` and have **no trailing slash**)*.
+
+---
+
 ## 📁 Repository Directory Architecture
 
 ```text
-phishguard/
+TrustLens/
 ├── .gitignore               # Shared: Ignores node_modules, venv, .env, __pycache__
-├── README.md                # Shared: Project overview & setup instructions
+├── README.md                # Shared: Project overview, deployment & setup instructions
 ├── AGENTS.md                # Shared: Coding agent instructions & architecture rules
+├── render.yaml              # Cloud: Render Blueprint service definition for backend
 │
 ├── docs/                    # Architecture & Workflow Documentation (Stages 1–11)
 │   ├── 01-problem.md        # Stage 1: Problem Definition
@@ -187,7 +231,8 @@ phishguard/
 │   ├── 07-test-plan.md      # Stage 6: Test Suite & Fixture Definitions
 │   ├── 08-tasks.md          # Stage 7: Task Breakdown & Team Ownership
 │   ├── 09-release.md        # Stage 10: Pre-Demo Checklist & Pitch Script
-│   └── 10-feedback.md       # Stage 11: Retrospective & Roadmap
+│   ├── 10-feedback.md       # Stage 11: Retrospective & Roadmap
+│   └── 11-frontend-integration-readiness.md # Frontend-backend contract audit
 │
 ├── shared/                  # CONTRACT LOCK ZONE (Read-Only across all roles)
 │   └── sample-threat.json   # Ground truth JSON payload for frontend & backend
@@ -195,9 +240,10 @@ phishguard/
 ├── frontend/                # ── MEMBER 1 (RAVI) EXCLUSIVE ZONE ──
 │   ├── index.html           # Root HTML entry point
 │   ├── package.json         # Frontend dependencies (React, Vite, Tailwind, Lucide)
-│   ├── vite.config.js       # Vite server & proxy configuration
+│   ├── vite.config.js       # Vite server configuration
+│   ├── vercel.json          # Vercel deployment & SPA rewrite routing
 │   ├── tailwind.config.js   # Custom threat color themes (Red, Amber, Green)
-│   ├── .env                 # Client environment: VITE_API_URL only
+│   ├── .env.example         # Client environment template: VITE_API_URL
 │   └── src/
 │       ├── main.jsx         # React application mounting
 │       ├── App.jsx          # Layout, view tabs, and scan state router
@@ -209,11 +255,12 @@ phishguard/
 │           ├── ThreatCard.jsx       # Risk gauge (0–100), color+text badge, verdict
 │           ├── QuoteHighlighter.jsx # Text body with red-flag sentences highlighted
 │           ├── ActionChecklist.jsx  # Interactive safety checklist & next steps
+│           ├── BackendStatus.jsx    # Live backend health monitor & diagnostic modal
 │           └── ShareModal.jsx       # 1-click WhatsApp family warning share link
 │
 ├── backend/                 # ── SERVER & GATEWAY ZONE ──
 │   ├── requirements.txt     # Python dependencies
-│   ├── .env                 # Server environment: GEMINI_API_KEY, PORT, CORS
+│   ├── .env.example         # Server environment template: GEMINI_API_KEY, PORT, CORS
 │   │
 │   ├── main.py              # ── MEMBER 2 (ABHINAV) EXCLUSIVE ZONE ──
 │   ├── schemas.py           # Pydantic request & response validation schemas
@@ -227,17 +274,19 @@ phishguard/
 │   │
 │   ├── ai/                  # ── MEMBER 4 (ADITHYA) EXCLUSIVE ZONE ──
 │   │   ├── __init__.py
-│   │   ├── gemini_client.py # Free Gemini 1.5 Flash client (structured JSON only)
+│   │   ├── gemini_client.py # Free Gemini 3.5 Flash Lite client (structured JSON only)
 │   │   └── system_prompt.md # Master prompt for urgency, panic & intent analysis
 │   │
 │   └── integrations/        # ── MEMBER 4 (ADITHYA) EXCLUSIVE ZONE ──
 │       ├── __init__.py
-│       └── media_extractor.py # Local QR decoding (pyzbar) & screenshot OCR parsing
+│       └── media_extractor.py # Local QR decoding (OpenCV) & screenshot OCR parsing
 │
 └── tests/                   # Shared Test Suites & Fixtures
     ├── test_contract.py     # Abhinav: Contract & schema conformance tests
     ├── test_heuristics.py   # Manohar: Standalone deterministic unit tests
     ├── test_ai_pipeline.py  # Adithya: Gemini JSON output & prompt regression tests
+    ├── test_gemini_client.py# Adithya: Live model initialization & response parsing
+    ├── test_media_extractor.py # Adithya: QR code and image extraction tests
     └── fixtures/            # Shared scam fixtures (CEO fraud, PayPal spoof, clean SMS)
         ├── t01_ceo_fraud.json
         ├── t02_typosquat_paypal.json
