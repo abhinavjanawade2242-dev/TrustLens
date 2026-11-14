@@ -12,6 +12,8 @@
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/api/health` | Walking skeleton & server status | None | JSON |
 | `POST` | `/api/analyze` | Unified threat analysis endpoint | JSON or `multipart/form-data` | JSON (`sample-threat.json`) |
+| `POST` | `/api/analyze/text` | Specialized text analysis route (alias) | JSON | JSON (`sample-threat.json`) |
+| `POST` | `/api/analyze/url` | Specialized URL analysis route (alias) | JSON | JSON (`sample-threat.json`) |
 
 ---
 
