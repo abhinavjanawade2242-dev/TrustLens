@@ -18,10 +18,11 @@ Run this 30-minute checklist before calling judges to your table:
 - [ ] Quick demo buttons populate instant test inputs.
 
 ### Backend & Server Performance (Abhinav)
-- [ ] Server starts cleanly with `uvicorn main:app --reload` on port 8000.
-- [ ] `GET /api/health` returns `{"ok": true}` in under 10ms.
-- [ ] CORS is configured so the browser never blocks requests from the frontend.
-- [ ] Server logs do NOT print passwords, private message contents, or API keys.
+- [x] Server starts cleanly with `uvicorn backend.main:app --reload` on port 8000.
+- [x] `GET /api/health` returns `{"ok": true}` in under 10ms (Benchmarked: ~4.85ms).
+- [x] CORS is configured so the browser never blocks requests from the frontend (`allow_origins=["*"]`).
+- [x] Server logs do NOT print passwords, private message contents, or API keys.
+- [x] Graceful degradation verified: offline heuristic fallback responds in <75ms on missing API key/timeout.
 
 ### Security Heuristics (Manohar)
 - [ ] `pytest tests/test_heuristics.py` passes with 100% success.

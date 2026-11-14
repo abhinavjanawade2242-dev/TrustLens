@@ -1,38 +1,46 @@
-"""Contract Invariance & Schema Tests for PhishGuard AI / TrustLens.
-Ensures the backend API response strictly conforms to docs/06a-api-contract.md
-and shared/sample-threat.json without breaking frontend components.
+"""Contract Invariance, Route Verification & Risk Synthesizer Tests for PhishGuard AI / TrustLens.
+
+Verifies:
+1. GET /api/health schema and status
+2. POST /api/analyze (JSON & multipart)
+3. POST /api/analyze/text and POST /api/analyze/url aliases
+4. Composite risk synthesizer rule:
+   - IF heuristics.is_spoofed == True -> FORCE threat_level="CRITICAL", score >= 85
+5. Error handling: HTTP 422 on empty inputs
+6. Strict schema validation against ThreatAnalysisResponse and shared/sample-threat.json
 
 Author: Abhinav (Member 2 - Backend & System Orchestrator Lead)
 """
 
+import io
 import json
 from pathlib import Path
 import pytest
 from pydantic import ValidationError
+from fastapi.testclient import TestClient
 
 from backend.schemas import (
+    AnalyzeRequest,
+    HealthResponse,
     ThreatAnalysisResponse,
     ThreatLevel,
     UrgencyLevel,
-    HealthResponse,
-    AnalyzeRequest,
 )
 from backend.main import app
-from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
 
 def test_health_endpoint_contract():
-    """Verify GET /api/health conforms to contract."""
+    """Verify GET /api/health conforms strictly to contract."""
     response = client.get("/api/health")
     assert response.status_code == 200
     data = response.json()
     validated = HealthResponse.model_validate(data)
     assert validated.ok is True
     assert validated.status in ["online", "operational"]
-    assert "service" in data
-    assert "version" in data
+    assert validated.service == "PhishGuard AI Engine"
+    assert validated.version == "1.0.0"
 
 
 def test_sample_threat_fixture_matches_contract():
@@ -79,14 +87,104 @@ def test_schema_rejects_invalid_threat_level():
         ThreatAnalysisResponse.model_validate(valid_base)
 
 
-def test_analyze_request_supports_both_contract_and_ui_shapes():
-    """Verify AnalyzeRequest parses both {text, url} and {type, content}."""
-    # Standard contract format
-    req1 = AnalyzeRequest.model_validate({"text": "Suspicious SMS", "url": "https://evil.example"})
-    assert req1.text == "Suspicious SMS"
-    assert req1.url == "https://evil.example"
+def test_analyze_endpoint_json_contract():
+    """Verify POST /api/analyze with standard JSON returns valid ThreatAnalysisResponse."""
+    payload = {
+        "text": "Your account has been restricted. Verify your identity immediately.",
+        "url": "https://service-notice.example",
+    }
+    response = client.post("/api/analyze", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    validated = ThreatAnalysisResponse.model_validate(data)
+    assert validated.scan_id.startswith("scan_")
+    assert validated.threat_level in [ThreatLevel.SAFE, ThreatLevel.SUSPICIOUS, ThreatLevel.CRITICAL]
+    assert 0 <= validated.risk_score <= 100
+    assert len(validated.recommended_actions) > 0
 
-    # UI api.js format
-    req2 = AnalyzeRequest.model_validate({"type": "url", "content": "https://evil.example"})
-    assert req2.type == "url"
-    assert req2.content == "https://evil.example"
+
+def test_analyze_endpoint_frontend_ui_format():
+    """Verify POST /api/analyze accepts frontend api.js format {type, content}."""
+    payload = {
+        "type": "text",
+        "content": "Urgent wire payment request for overdue invoice #8892.",
+    }
+    response = client.post("/api/analyze", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    validated = ThreatAnalysisResponse.model_validate(data)
+    assert validated.scan_id is not None
+    assert validated.risk_score >= 0
+
+
+def test_typosquatting_forces_critical_threat_level():
+    """
+    Playbook directive:
+    IF heuristics.is_spoofed == True -> FORCE threat_level="CRITICAL", score >= 85
+    """
+    payload = {
+        "type": "url",
+        "content": "https://paypa1-security-center.com/login",
+    }
+    response = client.post("/api/analyze", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    validated = ThreatAnalysisResponse.model_validate(data)
+    assert validated.threat_level == ThreatLevel.CRITICAL
+    assert validated.risk_score >= 85
+    assert validated.url_analysis is not None
+    assert validated.url_analysis.is_spoofed is True
+    assert validated.target_impersonated == "paypal"
+
+
+def test_analyze_url_alias_route():
+    """Verify POST /api/analyze/url alias used by frontend works seamlessly."""
+    payload = {
+        "type": "url",
+        "content": "https://netflix-verify-billing.xyz",
+    }
+    response = client.post("/api/analyze/url", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    validated = ThreatAnalysisResponse.model_validate(data)
+    assert validated.threat_level == ThreatLevel.CRITICAL
+    assert validated.risk_score >= 85
+    assert validated.url_analysis.is_spoofed is True
+
+
+def test_analyze_text_alias_route():
+    """Verify POST /api/analyze/text alias used by frontend works seamlessly."""
+    payload = {
+        "type": "text",
+        "content": "Your bank account has been locked. Verify immediately or funds will be seized.",
+    }
+    response = client.post("/api/analyze/text", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    validated = ThreatAnalysisResponse.model_validate(data)
+    assert validated.risk_score > 0
+    assert len(validated.plain_english_explanation) > 0
+
+
+def test_analyze_multipart_upload():
+    """Verify POST /api/analyze supports multipart image upload."""
+    # Create minimal 1x1 dummy PNG in-memory
+    dummy_png = (
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"
+        b"\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+    )
+    files = {"image": ("test.png", dummy_png, "image/png")}
+    data = {"type": "image", "content": "Screenshot payment lure"}
+    response = client.post("/api/analyze", files=files, data=data)
+    assert response.status_code == 200
+    res_data = response.json()
+    validated = ThreatAnalysisResponse.model_validate(res_data)
+    assert validated.scan_id is not None
+
+
+def test_empty_input_returns_422():
+    """Verify 422 Unprocessable Entity when all inputs are empty."""
+    response = client.post("/api/analyze", json={})
+    assert response.status_code == 422
+    err_data = response.json()
+    assert "detail" in err_data

@@ -99,5 +99,5 @@ class HealthResponse(BaseModel):
 
     ok: bool = True
     service: str = "PhishGuard AI Engine"
-    status: str = "operational"
+    status: str = "online"
     version: str = "1.0.0"

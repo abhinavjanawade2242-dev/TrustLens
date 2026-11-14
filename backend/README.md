@@ -17,18 +17,17 @@ python -m pip install -r backend\requirements-dev.txt
 python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The walking skeleton currently provides `GET /api/health`, which the frontend
-uses to report whether the backend is online. Analysis endpoints will be added
-in the next backend implementation stages.
+The backend provides:
+- `GET /api/health`: Health status and service verification.
+- `POST /api/analyze`: Unified threat analysis accepting JSON or multipart form images.
+- `POST /api/analyze/text` & `POST /api/analyze/url`: Specialized aliases for frontend compatibility.
 
-By default, CORS permits the Vite development origins
-`http://localhost:5173` and `http://127.0.0.1:5173`. Set
-`TRUSTLENS_ALLOWED_ORIGINS` to a comma-separated origin list to override them.
+CORS permits all development origins by default (including Vite on port 5173).
 
 ## Test
 
 From the repository root:
 
 ```powershell
-python -m pytest backend\tests
+python -m pytest
 ```
