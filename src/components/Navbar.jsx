@@ -79,7 +79,7 @@ export default function Navbar({ activePage, setActivePage, forceMock, setForceM
             {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
+              className="md:hidden min-h-12 min-w-12 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

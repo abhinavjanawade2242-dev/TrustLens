@@ -145,7 +145,15 @@ export default function ThreatHistory({ history = [], onClearHistory, onSelectHi
               <div
                 key={item.scan_id || Math.random()}
                 onClick={() => handleOpenResult(item)}
-                className={`p-5 rounded-2xl bg-midnight-900/80 border ${details.borderSubtle} hover:border-slate-700 transition cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4`}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleOpenResult(item);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                className={`p-5 rounded-2xl bg-midnight-900/80 border ${details.borderSubtle} hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 transition cursor-pointer group flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4`}
               >
                 <div className="space-y-2 flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">

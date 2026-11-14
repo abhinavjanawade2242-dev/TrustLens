@@ -179,7 +179,7 @@ export default function HowItWorks({ setActivePage }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-1">
             <span className="text-xs font-bold font-mono text-emerald-400">
-              SAFE: 0 - 34
+              SAFE: 0 - 39
             </span>
             <p className="text-xs text-slate-300">
               Normal operational communication. Lacks psychological extortion, urgency pressure, or unverified credential gates.
@@ -188,7 +188,7 @@ export default function HowItWorks({ setActivePage }) {
 
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-1">
             <span className="text-xs font-bold font-mono text-amber-400">
-              SUSPICIOUS: 35 - 69
+              SUSPICIOUS: 40 - 69
             </span>
             <p className="text-xs text-slate-300">
               Anomalous keywords, low-reputation top-level domains, or mild urgency. Requires verification via a secondary trusted channel.

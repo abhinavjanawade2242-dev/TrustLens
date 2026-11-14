@@ -32,6 +32,8 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
   const [imageError, setImageError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+  const maxImageSize = 10 * 1024 * 1024;
+  const supportedImageTypes = ['image/png', 'image/jpeg', 'image/webp'];
 
   // Text Submission
   const handleTextSubmit = (e) => {
@@ -71,14 +73,22 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
     setImageError('');
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setImageError('Unsupported file type. Please upload an image file (PNG, JPG, WEBP).');
+    const rejectFile = (message) => {
+      setSelectedFile(null);
+      setImagePreview(null);
+      setImageError(message);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    };
+
+    if (!supportedImageTypes.includes(file.type)) {
+      rejectFile('Unsupported file type. Please upload an image file (PNG, JPG, WEBP).');
       return;
     }
 
-    // 5MB limit
-    if (file.size > 5 * 1024 * 1024) {
-      setImageError('File size exceeds 5MB limit. Please provide a smaller image screenshot.');
+    if (file.size > maxImageSize) {
+      rejectFile('File size exceeds 10 MB limit. Please provide a smaller image screenshot.');
       return;
     }
 
@@ -86,6 +96,11 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
     const reader = new FileReader();
     reader.onload = () => {
       setImagePreview(reader.result);
+    };
+    reader.onerror = () => {
+      setSelectedFile(null);
+      setImagePreview(null);
+      setImageError('The selected image could not be read. Please choose another file.');
     };
     reader.readAsDataURL(file);
   };
@@ -130,10 +145,16 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
   return (
     <div className="rounded-2xl bg-midnight-900/85 border border-slate-800/90 shadow-2xl backdrop-blur-xl overflow-hidden">
       {/* Tabs Header */}
-      <div className="flex border-b border-slate-800 bg-midnight-950/60 p-2 gap-1.5 overflow-x-auto">
+      <div role="tablist" aria-label="Analysis input type" className="flex border-b border-slate-800 bg-midnight-950/60 p-2 gap-1.5 overflow-x-auto">
         <button
+          type="button"
+          role="tab"
+          id="text-tab"
+          aria-controls="text-panel"
+          aria-selected={activeTab === 'text'}
+          disabled={isLoading}
           onClick={() => setActiveTab('text')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+          className={`flex min-h-12 shrink-0 items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
             activeTab === 'text'
               ? 'bg-slate-800 text-cyan-400 border border-cyan-500/30 shadow-md shadow-cyan-950'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
@@ -144,8 +165,14 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
         </button>
 
         <button
+          type="button"
+          role="tab"
+          id="url-tab"
+          aria-controls="url-panel"
+          aria-selected={activeTab === 'url'}
+          disabled={isLoading}
           onClick={() => setActiveTab('url')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+          className={`flex min-h-12 shrink-0 items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
             activeTab === 'url'
               ? 'bg-slate-800 text-cyan-400 border border-cyan-500/30 shadow-md shadow-cyan-950'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
@@ -156,8 +183,14 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
         </button>
 
         <button
+          type="button"
+          role="tab"
+          id="image-tab"
+          aria-controls="image-panel"
+          aria-selected={activeTab === 'image'}
+          disabled={isLoading}
           onClick={() => setActiveTab('image')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+          className={`flex min-h-12 shrink-0 items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
             activeTab === 'image'
               ? 'bg-slate-800 text-cyan-400 border border-cyan-500/30 shadow-md shadow-cyan-950'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
@@ -172,7 +205,7 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
       <div className="p-6 sm:p-8">
         {/* TAB 1: TEXT ANALYSIS */}
         {activeTab === 'text' && (
-          <form onSubmit={handleTextSubmit} className="space-y-4">
+          <form id="text-panel" role="tabpanel" aria-labelledby="text-tab" onSubmit={handleTextSubmit} className="space-y-4">
             <div className="flex items-center justify-between text-xs text-slate-400">
               <label htmlFor="text-input-field" className="font-semibold text-slate-300">
                 Paste Communication Payload (Email, SMS, WhatsApp, Chat):
@@ -185,17 +218,20 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
                 id="text-input-field"
                 rows={5}
                 value={textContent}
+                disabled={isLoading}
+                aria-invalid={Boolean(textError)}
+                aria-describedby={textError ? 'text-input-error' : undefined}
                 onChange={(e) => {
                   setTextContent(e.target.value);
                   if (textError) setTextError('');
                 }}
                 placeholder="Example: 'URGENT: Your account has been locked. Verify your password and 2FA code at http://login-verify... within 24 hours to prevent termination.'"
-                className="w-full rounded-xl bg-midnight-950 border border-slate-800 p-4 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/40 transition font-sans leading-relaxed resize-y"
+                className="w-full rounded-xl bg-midnight-950 border border-slate-800 p-4 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/40 transition font-sans leading-relaxed resize-y disabled:opacity-60"
               />
             </div>
 
             {textError && (
-              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <div id="text-input-error" role="alert" className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{textError}</span>
               </div>
@@ -208,8 +244,8 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
                   setTextContent('');
                   setTextError('');
                 }}
-                disabled={!textContent}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white disabled:opacity-30 transition"
+                disabled={isLoading || !textContent}
+                className="flex min-h-12 items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white disabled:opacity-30 transition"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Clear Input</span>
@@ -218,7 +254,7 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-midnight-950 bg-gradient-to-r from-cyan-400 to-cyan-300 hover:from-cyan-300 hover:to-cyan-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
+                className="flex min-h-12 items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-midnight-950 bg-gradient-to-r from-cyan-400 to-cyan-300 hover:from-cyan-300 hover:to-cyan-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
               >
                 <span>{isLoading ? 'Scanning...' : 'Analyze Message'}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -229,7 +265,7 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
 
         {/* TAB 2: URL ANALYSIS */}
         {activeTab === 'url' && (
-          <form onSubmit={handleUrlSubmit} className="space-y-4">
+          <form id="url-panel" role="tabpanel" aria-labelledby="url-tab" onSubmit={handleUrlSubmit} className="space-y-4">
             <div className="flex items-center justify-between text-xs text-slate-400">
               <label htmlFor="url-input-field" className="font-semibold text-slate-300">
                 Submit Destination URL or Domain:
@@ -242,12 +278,15 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
                 id="url-input-field"
                 type="text"
                 value={urlInput}
+                disabled={isLoading}
+                aria-invalid={Boolean(urlError)}
+                aria-describedby={urlError ? 'url-input-error' : undefined}
                 onChange={(e) => {
                   setUrlInput(e.target.value);
                   if (urlError) setUrlError('');
                 }}
                 placeholder="e.g. https://paypal-security-verification-portal.com/login"
-                className="w-full rounded-xl bg-midnight-950 border border-slate-800 px-4 py-3 text-sm text-slate-200 font-mono placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/40 transition"
+                className="w-full min-h-12 rounded-xl bg-midnight-950 border border-slate-800 px-4 py-3 text-base text-slate-200 font-mono placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/40 transition disabled:opacity-60"
               />
             </div>
 
@@ -268,7 +307,7 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
             )}
 
             {urlError && (
-              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <div id="url-input-error" role="alert" className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{urlError}</span>
               </div>
@@ -288,8 +327,8 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
                   setUrlInput('');
                   setUrlError('');
                 }}
-                disabled={!urlInput}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white disabled:opacity-30 transition"
+                disabled={isLoading || !urlInput}
+                className="flex min-h-12 items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white disabled:opacity-30 transition"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Clear URL</span>
@@ -298,7 +337,7 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-midnight-950 bg-gradient-to-r from-cyan-400 to-cyan-300 hover:from-cyan-300 hover:to-cyan-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
+                className="flex min-h-12 items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-midnight-950 bg-gradient-to-r from-cyan-400 to-cyan-300 hover:from-cyan-300 hover:to-cyan-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
               >
                 <span>{isLoading ? 'Inspecting...' : 'Analyze Domain'}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -309,12 +348,13 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
 
         {/* TAB 3: IMAGE ANALYSIS */}
         {activeTab === 'image' && (
-          <form onSubmit={handleImageSubmit} className="space-y-4">
+          <form id="image-panel" role="tabpanel" aria-labelledby="image-tab" onSubmit={handleImageSubmit} className="space-y-4">
             <input
               type="file"
               ref={fileInputRef}
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp"
               className="hidden"
+              disabled={isLoading}
               onChange={(e) => {
                 if (e.target.files && e.target.files[0]) {
                   handleFileSelection(e.target.files[0]);
@@ -323,12 +363,14 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
             />
 
             {!selectedFile ? (
-              <div
+              <button
+                type="button"
+                disabled={isLoading}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`p-8 rounded-2xl border-2 border-dashed cursor-pointer transition text-center flex flex-col items-center justify-center gap-3 ${
+                className={`w-full min-h-48 p-8 rounded-2xl border-2 border-dashed cursor-pointer transition text-center flex flex-col items-center justify-center gap-3 disabled:cursor-not-allowed disabled:opacity-60 ${
                   isDragging
                     ? 'border-cyan-400 bg-cyan-500/10'
                     : 'border-slate-800 bg-midnight-950 hover:border-slate-700 hover:bg-slate-900/50'
@@ -342,10 +384,10 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
                     Click to select or drag and drop a screenshot
                   </span>
                   <p className="text-xs text-slate-400 mt-1">
-                    Supports PNG, JPG, or WEBP up to 5MB
+                    Supports PNG, JPG, or WEBP up to 10 MB
                   </p>
                 </div>
-              </div>
+              </button>
             ) : (
               <div className="p-4 rounded-xl bg-midnight-950 border border-slate-800 flex flex-col sm:flex-row items-center gap-4">
                 {imagePreview && (
@@ -372,7 +414,8 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
                 <button
                   type="button"
                   onClick={clearImage}
-                  className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                  disabled={isLoading}
+                  className="min-h-12 min-w-12 p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition disabled:opacity-50"
                   title="Remove image"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -381,7 +424,7 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
             )}
 
             {imageError && (
-              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <div role="alert" className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{imageError}</span>
               </div>
@@ -402,8 +445,8 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
               <button
                 type="button"
                 onClick={clearImage}
-                disabled={!selectedFile}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white disabled:opacity-30 transition"
+                disabled={isLoading || !selectedFile}
+                className="flex min-h-12 items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white disabled:opacity-30 transition"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Remove</span>
@@ -412,7 +455,7 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
               <button
                 type="submit"
                 disabled={isLoading || !selectedFile}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-midnight-950 bg-gradient-to-r from-cyan-400 to-cyan-300 hover:from-cyan-300 hover:to-cyan-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
+                className="flex min-h-12 items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-midnight-950 bg-gradient-to-r from-cyan-400 to-cyan-300 hover:from-cyan-300 hover:to-cyan-200 shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
               >
                 <span>{isLoading ? 'Processing Image...' : 'Analyze Screenshot'}</span>
                 <ArrowRight className="w-4 h-4" />

@@ -2,8 +2,8 @@
  * Risk classification and visual helper utilities for TrustLens
  * 
  * Strict thresholds:
- * SAFE: 0 - 34
- * SUSPICIOUS: 35 - 69
+ * SAFE: 0 - 39
+ * SUSPICIOUS: 40 - 69
  * CRITICAL: 70 - 100
  */
 
@@ -16,7 +16,7 @@ export const RISK_LEVELS = {
 export function getThreatLevel(score) {
   const num = Number(score) || 0;
   if (num >= 70) return RISK_LEVELS.CRITICAL;
-  if (num >= 35) return RISK_LEVELS.SUSPICIOUS;
+  if (num >= 40) return RISK_LEVELS.SUSPICIOUS;
   return RISK_LEVELS.SAFE;
 }
 

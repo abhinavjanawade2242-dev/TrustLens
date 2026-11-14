@@ -132,9 +132,9 @@ export default function Dashboard({
   return (
     <div className="space-y-12 pb-16">
       {/* 1. HERO SECTION */}
-      <section className="relative pt-6 sm:pt-12 text-center max-w-4xl mx-auto px-4">
+      <section className="relative overflow-hidden pt-6 sm:pt-12 text-center max-w-4xl mx-auto px-4">
         {/* Subtle decorative glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(500px,100vw)] h-[300px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
@@ -149,7 +149,7 @@ export default function Dashboard({
             </span>
           </h1>
 
-          <p className="text-sm sm:text-base lg:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base lg:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
             TrustLens gives everyday internet users and cybersecurity teams an intelligent lens to dissect manipulative emails, deceptive domains, credential harvesting lures, and payment fraud before damage is done.
           </p>
 
@@ -157,7 +157,7 @@ export default function Dashboard({
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={scrollToWorkspace}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-midnight-950 bg-gradient-to-r from-cyan-400 to-cyan-300 hover:from-cyan-300 hover:to-cyan-200 shadow-lg shadow-cyan-500/25 transition-all transform hover:-translate-y-0.5"
+              className="flex min-h-12 items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-midnight-950 bg-gradient-to-r from-cyan-400 to-cyan-300 hover:from-cyan-300 hover:to-cyan-200 shadow-lg shadow-cyan-500/25 transition-all transform hover:-translate-y-0.5"
             >
               <Search className="w-4 h-4" />
               <span>Analyze Message or URL Now</span>
@@ -166,7 +166,7 @@ export default function Dashboard({
 
             <button
               onClick={() => setActivePage('how-it-works')}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition"
+              className="flex min-h-12 items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition"
             >
               <span>Explore Detection Architecture</span>
               <ChevronRight className="w-4 h-4" />
@@ -234,7 +234,7 @@ export default function Dashboard({
 
         {/* Error Notice Card */}
         {errorNotice && (
-          <div className="mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
+          <div role="alert" className="mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 shrink-0" />
               <span>{errorNotice}</span>
@@ -256,10 +256,31 @@ export default function Dashboard({
         </section>
       )}
 
+      {!activeResult && !isScanning && (
+        <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8" aria-live="polite">
+          <div className="flex items-start gap-4 rounded-2xl border border-slate-800 bg-midnight-900/70 p-5 sm:p-6">
+            <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-cyan-300">
+              <ShieldCheck className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">Threat evaluation</h2>
+              <p className="mt-1 text-base leading-relaxed text-slate-300">
+                Run a scan to view detailed threat evaluation. Start with a sample scenario or submit a message, URL, or image above.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 6. THREAT INTELLIGENCE RESULTS */}
       <div id="threat-results-anchor" />
       {activeResult && !isScanning && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          {scanSource === 'mock' && (
+            <div role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-relaxed text-amber-100">
+              Local demo analysis only — this is not a live security verdict. Do not rely on it to decide whether an unfamiliar message or link is safe.
+            </div>
+          )}
           {/* Main Threat Header & Risk Gauge */}
           <ThreatCard result={activeResult} />
 
@@ -289,6 +310,7 @@ export default function Dashboard({
           <ActionChecklist 
             actions={activeResult.recommended_actions || []} 
             threatLevel={activeResult.threat_level} 
+            riskScore={activeResult.risk_score}
           />
         </section>
       )}

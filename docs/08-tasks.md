@@ -32,3 +32,7 @@
 
 - [x] **Task 1 — Walking Skeleton:** Added the FastAPI `/api/health` endpoint,
   configured local frontend CORS, and documented backend setup and testing.
+- [x] **Task 2a — Frontend Screen States:** Completed the responsive analysis
+  workspace, text/URL/image input tabs, scanning radar, threat results and
+  explainability panels; added four mock scenarios, accessible checklist and
+  share actions, explicit empty/offline states, and the universal disclaimer.

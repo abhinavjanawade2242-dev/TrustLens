@@ -136,7 +136,7 @@ function sanitizeResponse(raw, originalContent, type) {
   let threatLevel = raw.threat_level;
   if (!threatLevel) {
     if (riskScore >= 70) threatLevel = 'CRITICAL';
-    else if (riskScore >= 35) threatLevel = 'SUSPICIOUS';
+    else if (riskScore >= 40) threatLevel = 'SUSPICIOUS';
     else threatLevel = 'SAFE';
   }
 
@@ -262,7 +262,7 @@ function runClientSideHeuristicEngine(type, content = '', file = null) {
       flags.push('No obvious character homoglyphs detected');
     }
 
-    const threatLevel = score >= 70 ? 'CRITICAL' : score >= 35 ? 'SUSPICIOUS' : 'SAFE';
+    const threatLevel = score >= 70 ? 'CRITICAL' : score >= 40 ? 'SUSPICIOUS' : 'SAFE';
 
     return {
       scan_id: `scan_url_${Date.now().toString(36)}`,
@@ -395,7 +395,7 @@ function runClientSideHeuristicEngine(type, content = '', file = null) {
   }
 
   score = Math.min(98, Math.max(8, score));
-  const threatLevel = score >= 70 ? 'CRITICAL' : score >= 35 ? 'SUSPICIOUS' : 'SAFE';
+  const threatLevel = score >= 70 ? 'CRITICAL' : score >= 40 ? 'SUSPICIOUS' : 'SAFE';
 
   return {
     scan_id: `scan_txt_${Date.now().toString(36)}`,

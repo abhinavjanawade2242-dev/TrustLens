@@ -113,6 +113,12 @@ export default function App() {
         {activePage === 'how-it-works' && (
           <HowItWorks setActivePage={handleNavChange} />
         )}
+
+        <footer className="border-t border-slate-800/80 bg-midnight-950/70 px-4 py-5 text-center text-base leading-relaxed text-slate-300">
+          PhishGuard provides automated risk analysis and educational guidance.
+          It does not replace official banking verification or professional
+          cybersecurity advice.
+        </footer>
       </main>
     </div>
   );

@@ -40,6 +40,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
       <div className="flex items-center gap-2">
         <button
           onClick={() => setShowModal(true)}
+          aria-label={`${forceMock ? 'Demo mock engine selected' : backendState.online ? 'Backend online' : 'Backend offline'}. Open backend settings`}
           className={`group flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
             isLive
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
@@ -61,7 +62,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
               }`}
             />
           </span>
-          <span className="font-mono">
+          <span className="hidden font-mono sm:inline">
             {forceMock
               ? 'Demo Mock Engine'
               : backendState.online

@@ -15,7 +15,7 @@ export default function DemoButtons({ onSelectDemo, isLoading }) {
         <span className="text-[11px] text-slate-400">1-click automated evaluation</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
         {DEMO_SCENARIOS.map((demo) => {
           const isCritical = demo.result.threat_level === 'CRITICAL';
           const Icon = isCritical ? ShieldAlert : ShieldCheck;
@@ -25,7 +25,7 @@ export default function DemoButtons({ onSelectDemo, isLoading }) {
               key={demo.id}
               onClick={() => onSelectDemo(demo)}
               disabled={isLoading}
-              className={`p-4 rounded-xl text-left transition-all border group relative overflow-hidden flex flex-col justify-between ${
+              className={`min-h-48 p-4 rounded-xl text-left transition-all border group relative overflow-hidden flex flex-col justify-between disabled:cursor-not-allowed disabled:opacity-50 ${
                 isCritical
                   ? 'bg-midnight-850/70 border-slate-800/80 hover:border-rose-500/50 hover:bg-slate-800/50'
                   : 'bg-midnight-850/70 border-slate-800/80 hover:border-emerald-500/50 hover:bg-slate-800/50'
