@@ -27,3 +27,8 @@
 - [x] **Abhinav:** Agrees to keep `/api/health` and `/api/analyze` schema-locked.
 - [x] **Manohar:** Agrees to build `heuristics.py` offline with zero LLM dependence.
 - [x] **Adithya:** Agrees to enforce strict JSON output from Gemini and build timeout fallbacks.
+
+## Build Progress
+
+- [x] **Task 1 — Walking Skeleton:** Added the FastAPI `/api/health` endpoint,
+  configured local frontend CORS, and documented backend setup and testing.
