@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  
+  body {
+    @apply bg-[#06090e] text-slate-100 antialiased font-sans;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 60%),
+      radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.04) 0%, transparent 50%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #080d16;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(13, 20, 34, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  
+  .glass-panel-elevated {
+    background: rgba(18, 27, 46, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  }
+
+  .glow-cyan-sm {
+    box-shadow: 0 0 15px -3px rgba(6, 182, 212, 0.25);
+  }
+
+  .glow-cyan-md {
+    box-shadow: 0 0 25px -4px rgba(6, 182, 212, 0.35);
+  }
+
+  .glow-critical {
+    box-shadow: 0 0 25px -4px rgba(244, 63, 94, 0.3);
+  }
+
+  .glow-suspicious {
+    box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.3);
+  }
+
+  .glow-safe {
+    box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.3);
+  }
+}
