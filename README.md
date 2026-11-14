@@ -3,12 +3,15 @@
 > **"Don't Trust the Message. Verify It."**  
 > AI-powered phishing, scam, malicious URL, and suspicious message detection platform.
 
+[![Live Web Application](https://img.shields.io/badge/🚀%20Live%20Web%20App-trust--lens--pink.vercel.app-00DC82?style=for-the-badge&logo=vercel&logoColor=white)](https://trust-lens-pink.vercel.app/)
+[![API Documentation](https://img.shields.io/badge/⚡%20Swagger%20Docs-onrender.com%2Fdocs-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://trustlens-backend-wk7c.onrender.com/docs)
+
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 [![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?logo=render&logoColor=black)](https://trustlens-backend-wk7c.onrender.com)
-[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?logo=vercel&logoColor=white)](https://trust-lens-pink.vercel.app/)
 
 ---
 
@@ -16,9 +19,10 @@
 **TrustLens** is a commercial-grade cybersecurity web application built for everyday internet users, students, security analysts, and enterprise teams. It dismantles deceptive social engineering lures, typosquatted brand domains, fake urgent invoices, and adversary-in-the-middle OTP stealers with forensic precision.
 
 ### 🔗 Live Production Endpoints
-* **Backend Gateway (Render):** [`https://trustlens-backend-wk7c.onrender.com`](https://trustlens-backend-wk7c.onrender.com)
-* **Health Check Probe:** [`https://trustlens-backend-wk7c.onrender.com/api/health`](https://trustlens-backend-wk7c.onrender.com/api/health)
-* **Interactive Swagger Docs:** [`https://trustlens-backend-wk7c.onrender.com/docs`](https://trustlens-backend-wk7c.onrender.com/docs)
+* **🌐 Interactive Web Application (Frontend):** [**https://trust-lens-pink.vercel.app**](https://trust-lens-pink.vercel.app) *(Launch directly in browser)*
+* **⚡ Backend API Gateway (Render):** [`https://trustlens-backend-wk7c.onrender.com`](https://trustlens-backend-wk7c.onrender.com)
+* **📖 Interactive Swagger OpenAPI Docs:** [`https://trustlens-backend-wk7c.onrender.com/docs`](https://trustlens-backend-wk7c.onrender.com/docs)
+* **🩺 Health Check Probe:** [`https://trustlens-backend-wk7c.onrender.com/api/health`](https://trustlens-backend-wk7c.onrender.com/api/health)
 * **API Specifications:** OpenAPI 3.1 strictly conforming to `shared/sample-threat.json`
 
 ---
@@ -199,6 +203,7 @@ The repository contains an automated [Render Blueprint (`render.yaml`)](render.y
 * **Live Service URL:** [`https://trustlens-backend-wk7c.onrender.com`](https://trustlens-backend-wk7c.onrender.com)
 
 ### 2. Frontend Web Client on Vercel (React + Vite)
+* **Live Application:** [**https://trust-lens-pink.vercel.app**](https://trust-lens-pink.vercel.app)
 * **Framework Preset:** Vite
 * **Root Directory:** `frontend` *(⚠️ Crucial: set to `frontend`, not repository root)*
 * **Build Command:** `npm run build`
