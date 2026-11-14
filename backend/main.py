@@ -492,6 +492,22 @@ def _run_full_pipeline(
 # API Routes
 # ============================================================================
 
+@app.get("/")
+async def root():
+    """Root status endpoint returning service info and available routes."""
+    return {
+        "ok": True,
+        "service": "PhishGuard AI Engine",
+        "status": "online",
+        "version": app.version,
+        "endpoints": {
+            "health": "/api/health",
+            "analyze": "/api/analyze",
+            "docs": "/docs",
+        },
+    }
+
+
 @app.get("/api/health", response_model=HealthResponse)
 async def health_check():
     """Walking skeleton & health check endpoint."""

@@ -31,6 +31,16 @@ from backend.main import app
 client = TestClient(app)
 
 
+def test_root_endpoint_returns_service_info():
+    """Verify GET / returns a 200 with service information and endpoints."""
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ok"] is True
+    assert data["service"] == "PhishGuard AI Engine"
+    assert "endpoints" in data
+
+
 def test_health_endpoint_contract():
     """Verify GET /api/health conforms strictly to contract."""
     response = client.get("/api/health")
