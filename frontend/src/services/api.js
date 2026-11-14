@@ -8,14 +8,16 @@
 import { normalizeUrl } from '../utils/riskHelpers';
 
 const DEFAULT_API_URL = 'http://localhost:8000';
-export const API_BASE_URL = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
+const rawUrl = (import.meta.env.VITE_API_URL || DEFAULT_API_URL).trim();
+export const API_BASE_URL = rawUrl.replace(/\/+$/, '');
 
 /**
  * Checks backend health at /api/health
  */
 export async function checkBackendHealth() {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3500);
+  // 12-second timeout to accommodate cloud platform (e.g. Render) cold-starts
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/health`, {
