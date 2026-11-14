@@ -25,8 +25,5 @@
     "rollup": "npm:@rollup/wasm-node@^4.68.3",
     "tailwindcss": "^3.4.15",
     "vite": "^5.4.11"
-  },
-  "overrides": {
-    "rollup": "npm:@rollup/wasm-node"
   }
 }

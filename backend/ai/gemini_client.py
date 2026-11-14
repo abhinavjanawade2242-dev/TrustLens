@@ -142,7 +142,7 @@ class GeminiPhishGuardClient:
     using the modern google-genai SDK.
     """
 
-    DEFAULT_MODEL = "gemini-2.5-flash"
+    DEFAULT_MODEL = "gemini-3.5-flash-lite"
 
     def __init__(
         self,
