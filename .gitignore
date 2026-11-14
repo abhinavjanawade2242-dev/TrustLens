@@ -4,5 +4,7 @@ dist
 .env.local
 .env.*.local
 *.log
+__pycache__/
+*.py[cod]
 .DS_Store
 .vite
