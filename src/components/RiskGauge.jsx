@@ -85,7 +85,7 @@ export default function RiskGauge({ score = 0, threatLevel, size = 180 }) {
           <span>{details.label}</span>
         </div>
         <p className="text-[11px] text-slate-400 mt-1.5 max-w-[220px]">
-          Score bracket: {level === 'CRITICAL' ? '70 - 100' : level === 'SUSPICIOUS' ? '35 - 69' : '0 - 34'}
+          Score bracket: {level === 'CRITICAL' ? '70 - 100' : level === 'SUSPICIOUS' ? '40 - 69' : '0 - 39'}
         </p>
       </div>
     </div>

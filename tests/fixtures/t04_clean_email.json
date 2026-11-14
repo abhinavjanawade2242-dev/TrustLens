@@ -1,0 +1,33 @@
+{
+  "scan_id": "scan_fixture_t04_clean",
+  "threat_level": "SAFE",
+  "risk_score": 5,
+  "summary_verdict": "Verified Benign Communication",
+  "plain_english_explanation": "The communication contains standard informational updates with no urgency vectors, credential harvesting solicitations, or deceptive domains.",
+  "target_impersonated": null,
+  "submitted_content": "Thank you for joining our monthly engineering sync. The meeting recording and presentation slides are available on our corporate portal: https://www.google.com/docs/meeting-summary",
+  "created_at": "2026-11-14T06:15:00Z",
+  "url_analysis": {
+    "submitted_url": "https://www.google.com/docs/meeting-summary",
+    "actual_domain": "google.com",
+    "is_spoofed": false,
+    "lookalike_brand": null,
+    "character_substitution": null,
+    "https_status": {
+      "present": true,
+      "note": "Uses standard SSL encryption."
+    },
+    "heuristic_flags": []
+  },
+  "ai_social_engineering": {
+    "urgency_level": "NONE",
+    "tactics_detected": [],
+    "highlighted_quotes": [],
+    "manipulation_pattern": null,
+    "evidence_level": "Benign Content Signal"
+  },
+  "why_dangerous": [],
+  "recommended_actions": [
+    "Payload exhibits standard benign patterns; normal digital hygiene is recommended."
+  ]
+}

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Highlighter, Info, ShieldCheck, AlertCircle, Quote } from 'lucide-react';
 
-export default function QuoteHighlighter({ originalText = '', quotes = [] }) {
-  const [selectedQuote, setSelectedQuote] = useState(quotes.length > 0 ? quotes[0] : null);
+const EMPTY_QUOTES = [];
 
+export default function QuoteHighlighter({ originalText = '', quotes = EMPTY_QUOTES }) {
   // Normalize quotes structure: could be array of strings or array of objects
   const normalizedQuotes = quotes.map((q, idx) => {
     if (typeof q === 'string') {
@@ -21,6 +21,12 @@ export default function QuoteHighlighter({ originalText = '', quotes = [] }) {
       reason: q.reason || 'Flagged for suspicious terminology or coercion.'
     };
   }).filter(q => q.quote && q.quote.trim().length > 0);
+
+  const [selectedQuote, setSelectedQuote] = useState(normalizedQuotes[0] || null);
+
+  useEffect(() => {
+    setSelectedQuote(normalizedQuotes[0] || null);
+  }, [originalText, quotes]);
 
   if (!originalText || originalText.trim().length === 0) {
     return null;
@@ -47,15 +53,15 @@ export default function QuoteHighlighter({ originalText = '', quotes = [] }) {
           <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
           <div>
             <span className="font-semibold text-white text-sm block">
-              No High-Risk Phrases Detected
+              No Highlighted Phrases in This Result
             </span>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              The NLP extractor scanned the submitted communication and found no overt urgent phrases, panic keywords, or direct solicitations for passwords/credentials.
+              This result contains no quote-level flags. That does not prove the message is safe; verify the sender and destination independently.
             </p>
           </div>
         </div>
 
-        <div className="mt-4 p-4 rounded-xl bg-midnight-950 border border-slate-800/80 font-mono text-xs text-slate-300 whitespace-pre-wrap leading-relaxed">
+        <div className="mt-4 p-4 rounded-xl bg-midnight-950 border border-slate-800/80 font-mono text-base text-slate-300 whitespace-pre-wrap [overflow-wrap:anywhere] leading-relaxed">
           {originalText}
         </div>
       </div>
@@ -103,10 +109,12 @@ export default function QuoteHighlighter({ originalText = '', quotes = [] }) {
       const isSelected = selectedQuote && (selectedQuote.quote === seg.quoteObj.quote);
 
       return (
-        <mark
+        <button
+          type="button"
+          aria-label={`Inspect flagged phrase: ${seg.text}`}
           key={i}
           onClick={() => setSelectedQuote(seg.quoteObj)}
-          className={`cursor-pointer inline rounded px-1.5 py-0.5 mx-0.5 font-medium transition-all duration-200 border ${
+          className={`cursor-pointer inline rounded px-1.5 py-0.5 mx-0.5 text-left font-medium transition-all duration-200 border ${
             isSelected
               ? 'bg-rose-500/30 text-rose-200 border-rose-400 ring-2 ring-rose-500/40'
               : 'bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/25 hover:border-rose-400'
@@ -114,7 +122,7 @@ export default function QuoteHighlighter({ originalText = '', quotes = [] }) {
           title="Click to view why this phrase is suspicious"
         >
           {seg.text}
-        </mark>
+        </button>
       );
     });
   };
@@ -143,7 +151,7 @@ export default function QuoteHighlighter({ originalText = '', quotes = [] }) {
       </div>
 
       {/* Main Text Presentation Area */}
-      <div className="p-5 rounded-xl bg-midnight-950/90 border border-slate-800/80 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+      <div className="p-5 rounded-xl bg-midnight-950/90 border border-slate-800/80 text-base leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere] font-sans">
         {renderHighlightedContent()}
       </div>
 

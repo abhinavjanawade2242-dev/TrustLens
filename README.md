@@ -139,19 +139,108 @@ GET /api/health
 
 ## 🏃 Running the Application
 
-### 1. Start the Development Server
-```bash
+### 1. Backend Orchestration Gateway (Port 8000)
+```powershell
+# From repository root
+python -m pip install -r backend/requirements.txt
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+* **Health API**: `http://127.0.0.1:8000/api/health`
+* **Analysis API**: `http://127.0.0.1:8000/api/analyze`
+* **Interactive OpenAPI Docs**: `http://127.0.0.1:8000/docs`
+
+### 2. Frontend React Client (Port 5173)
+```powershell
+# From frontend workspace
+cd frontend
+npm install
 npm run dev
 ```
-The application will be accessible at `http://localhost:5173`.
+The application will launch at `http://localhost:5173`.
 
-### 2. Build for Production
-```bash
-npm run build
+### 3. Automated Test Suite
+```powershell
+# Run all unit, heuristics, AI pipeline, and contract invariance tests
+python -m pytest
 ```
-Production assets are generated in `dist/`.
 
-### 3. Preview Production Build
-```bash
-npm run preview
-```
+---
+
+## 📁 Repository Directory Architecture
+
+```text
+phishguard/
+├── .gitignore               # Shared: Ignores node_modules, venv, .env, __pycache__
+├── README.md                # Shared: Project overview & setup instructions
+├── AGENTS.md                # Shared: Coding agent instructions & architecture rules
+│
+├── docs/                    # Architecture & Workflow Documentation (Stages 1–11)
+│   ├── 01-problem.md        # Stage 1: Problem Definition
+│   ├── 02-research.md       # Stage 2: Competitive Analysis & Research
+│   ├── 03-scope.md          # Stage 3: Scope & MVP vs. Later vs. Never
+│   ├── 04-design.md         # Stage 4: Screen States & Visual Guardrails
+│   ├── 05-prd.md            # Stage 5: Functional & Safety Requirements
+│   ├── 06-architecture.md   # Stage 5: System Architecture & Data Flow
+│   ├── 06a-api-contract.md  # Stage 5: Single Source of Truth API Contract
+│   ├── 06b-safety-rules.md  # Stage 5: Deterministic Safety Rules
+│   ├── 06c-integrations.md  # Stage 5: Media & Messaging Integrations
+│   ├── 07-test-plan.md      # Stage 6: Test Suite & Fixture Definitions
+│   ├── 08-tasks.md          # Stage 7: Task Breakdown & Team Ownership
+│   ├── 09-release.md        # Stage 10: Pre-Demo Checklist & Pitch Script
+│   └── 10-feedback.md       # Stage 11: Retrospective & Roadmap
+│
+├── shared/                  # CONTRACT LOCK ZONE (Read-Only across all roles)
+│   └── sample-threat.json   # Ground truth JSON payload for frontend & backend
+│
+├── frontend/                # ── MEMBER 1 (RAVI) EXCLUSIVE ZONE ──
+│   ├── index.html           # Root HTML entry point
+│   ├── package.json         # Frontend dependencies (React, Vite, Tailwind, Lucide)
+│   ├── vite.config.js       # Vite server & proxy configuration
+│   ├── tailwind.config.js   # Custom threat color themes (Red, Amber, Green)
+│   ├── .env                 # Client environment: VITE_API_URL only
+│   └── src/
+│       ├── main.jsx         # React application mounting
+│       ├── App.jsx          # Layout, view tabs, and scan state router
+│       ├── mockData.js      # Local mock fallback (mirrors shared/sample-threat.json)
+│       ├── api.js           # Central fetch client (toggles mock vs live backend)
+│       └── components/
+│           ├── InputTabs.jsx        # Text paste, URL bar, and File dropzone
+│           ├── ScannerRadar.jsx     # Scanning skeleton & radar pulse animations
+│           ├── ThreatCard.jsx       # Risk gauge (0–100), color+text badge, verdict
+│           ├── QuoteHighlighter.jsx # Text body with red-flag sentences highlighted
+│           ├── ActionChecklist.jsx  # Interactive safety checklist & next steps
+│           └── ShareModal.jsx       # 1-click WhatsApp family warning share link
+│
+├── backend/                 # ── SERVER & GATEWAY ZONE ──
+│   ├── requirements.txt     # Python dependencies
+│   ├── .env                 # Server environment: GEMINI_API_KEY, PORT, CORS
+│   │
+│   ├── main.py              # ── MEMBER 2 (ABHINAV) EXCLUSIVE ZONE ──
+│   ├── schemas.py           # Pydantic request & response validation schemas
+│   ├── config.py            # CORS origin headers & runtime settings
+│   │
+│   ├── safety/              # ── MEMBER 3 (MANOHAR) EXCLUSIVE ZONE ──
+│   │   ├── __init__.py
+│   │   ├── heuristics.py    # Deterministic Levenshtein typosquatting & brand matcher
+│   │   ├── rules.py         # Regex filters for raw IP hosts, @ redirects, subdomains
+│   │   └── brands.py        # Hardcoded dictionary of top 50 impersonated brands
+│   │
+│   ├── ai/                  # ── MEMBER 4 (ADITHYA) EXCLUSIVE ZONE ──
+│   │   ├── __init__.py
+│   │   ├── gemini_client.py # Free Gemini 1.5 Flash client (structured JSON only)
+│   │   └── system_prompt.md # Master prompt for urgency, panic & intent analysis
+│   │
+│   └── integrations/        # ── MEMBER 4 (ADITHYA) EXCLUSIVE ZONE ──
+│       ├── __init__.py
+│       └── media_extractor.py # Local QR decoding (pyzbar) & screenshot OCR parsing
+│
+└── tests/                   # Shared Test Suites & Fixtures
+    ├── test_contract.py     # Abhinav: Contract & schema conformance tests
+    ├── test_heuristics.py   # Manohar: Standalone deterministic unit tests
+    ├── test_ai_pipeline.py  # Adithya: Gemini JSON output & prompt regression tests
+    └── fixtures/            # Shared scam fixtures (CEO fraud, PayPal spoof, clean SMS)
+        ├── t01_ceo_fraud.json
+        ├── t02_typosquat_paypal.json
+        ├── t03_package_smishing.json
+        └── t04_clean_email.json
+

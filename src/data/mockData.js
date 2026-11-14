@@ -214,8 +214,91 @@ Enter your 2FA verification code on the prompt to restore access within 15 minut
     }
   },
   {
-    id: 'demo-3-safe',
+    id: 'demo-3-package-smishing',
     badge: 'Demo 3',
+    title: 'Package Delivery Smishing',
+    category: 'Delivery SMS Phishing',
+    inputType: 'text',
+    shortDesc: 'A fake delivery interruption uses a small fee and short deadline to steal payment details.',
+    sampleInput: `Delivery notice: Your parcel is on hold because the address is incomplete.
+Pay a $1.25 redelivery fee within 12 hours to avoid returning your package:
+https://parcel-redelivery-check.example/confirm
+Enter your card details to release the shipment.`,
+    result: {
+      scan_id: 'scan_demo_package_001',
+      threat_level: 'CRITICAL',
+      risk_score: 88,
+      summary_verdict: 'Suspicious Delivery Notice & Payment Detail Request',
+      plain_english_explanation: 'This message creates urgency around a delayed package and asks for payment details through an unverified link. Confirm deliveries using the carrier’s official app or website instead.',
+      target_impersonated: 'Parcel Delivery Service',
+      submitted_content: 'Delivery notice: Your parcel is on hold because the address is incomplete. Pay a $1.25 redelivery fee within 12 hours to avoid returning your package: https://parcel-redelivery-check.example/confirm Enter your card details to release the shipment.',
+      created_at: new Date().toISOString(),
+      url_analysis: {
+        submitted_url: 'https://parcel-redelivery-check.example/confirm',
+        actual_domain: 'parcel-redelivery-check.example',
+        is_spoofed: false,
+        lookalike_brand: null,
+        character_substitution: null,
+        https_status: {
+          present: true,
+          note: 'HTTPS does not confirm that a delivery notice or payment page is legitimate.'
+        },
+        heuristic_flags: [
+          'Unverified delivery-related domain',
+          'Unexpected payment request in a delivery notice'
+        ]
+      },
+      ai_social_engineering: {
+        urgency_level: 'HIGH',
+        tactics_detected: [
+          'Short deadline to create pressure',
+          'Small-fee pretext to collect payment details',
+          'Delivery interruption used to prompt action'
+        ],
+        highlighted_quotes: [
+          {
+            quote: 'Your parcel is on hold because the address is incomplete.',
+            category: 'Delivery Disruption Pretext',
+            reason: 'A claimed delivery problem encourages a quick response without independently verifying the shipment.'
+          },
+          {
+            quote: 'Pay a $1.25 redelivery fee within 12 hours',
+            category: 'Urgency & Payment Request',
+            reason: 'A small fee and short deadline can make a payment request seem routine and discourage careful checking.'
+          },
+          {
+            quote: 'Enter your card details to release the shipment.',
+            category: 'Payment Detail Request',
+            reason: 'The message asks for payment information through an unverified link.'
+          }
+        ],
+        evidence_level: 'DEMO (Illustrative Message Patterns)',
+        manipulation_pattern: 'Delivery interruption combined with a low-value fee and short deadline.'
+      },
+      why_dangerous: [
+        {
+          title: 'Unexpected Delivery Problem',
+          category: 'Delivery Pretext',
+          detected_evidence: 'Your parcel is on hold because the address is incomplete.',
+          explanation: 'A surprise delivery issue can prompt a rushed click before the message is verified.'
+        },
+        {
+          title: 'Low-Fee Payment Lure',
+          category: 'Payment Detail Request',
+          detected_evidence: 'Pay a $1.25 redelivery fee within 12 hours',
+          explanation: 'A small charge may be used to collect card information or lead to further fraudulent charges.'
+        }
+      ],
+      recommended_actions: [
+        'Do not open the link or enter payment details',
+        'Check delivery status in the carrier’s official app or website',
+        'Contact the carrier using a phone number from its official website'
+      ]
+    }
+  },
+  {
+    id: 'demo-4-safe',
+    badge: 'Demo 4',
     title: 'Safe Tech Newsletter',
     category: 'Legitimate Communication',
     inputType: 'text',
@@ -337,8 +420,8 @@ export const RECENT_SAMPLE_SCANS = [
 ];
 
 export const TELEMETRY_METRICS = [
-  { label: 'Threats Analyzed (24h)', value: '18,492', change: '+14% vs avg', note: 'Global telemetry sample' },
-  { label: 'Active Phishing Domains', value: '4,109', change: 'Live index', note: 'Crowdsourced + Heuristic' },
-  { label: 'Average Detection Time', value: '1.2s', change: 'Real-time NLP', note: 'Multi-layer heuristic pipeline' },
-  { label: 'Social Engineering Accuracy', value: '99.4%', change: 'Validated', note: 'Calibrated detection models' },
+  { label: 'Analysis inputs', value: '3', change: 'Text · URL · image', note: 'Available input types' },
+  { label: 'Demo scenarios', value: '4', change: 'Illustrative only', note: 'Fixed sample fixtures' },
+  { label: 'Risk score scale', value: '0–100', change: 'Demo output', note: 'Not a verified probability' },
+  { label: 'Threat history', value: 'Browser', change: 'Local only', note: 'Stored on this device' },
 ];

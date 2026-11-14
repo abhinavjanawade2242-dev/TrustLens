@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, Shield, Activity, Check, Radio } from 'lucide-react';
+import { X, Check, Radio } from 'lucide-react';
 
 const STAGES = [
-  "Inspecting submitted content",
-  "Checking suspicious patterns",
-  "Evaluating social engineering signals",
-  "Preparing threat intelligence report"
+  "Preparing submitted content",
+  "Applying available analysis",
+  "Organizing detected indicators",
+  "Preparing the result"
 ];
 
 export default function ScannerRadar({ onCancel, isMock = false }) {
@@ -70,11 +70,11 @@ export default function ScannerRadar({ onCancel, isMock = false }) {
           <div className="flex items-center justify-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             <h3 className="text-lg font-bold text-white tracking-tight">
-              Threat Intelligence Engine Active
+              Scan in progress
             </h3>
           </div>
           <p className="text-xs font-mono text-cyan-400">
-            {isMock ? 'Executing local heuristic evaluation' : 'Streaming neural backend telemetry'}
+            {isMock ? 'Demo only — simulated scan animation; no AI model is running' : 'Waiting for the configured backend response'}
           </p>
         </div>
 

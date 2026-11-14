@@ -3,7 +3,6 @@ import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import ThreatHistory from './pages/ThreatHistory';
 import HowItWorks from './pages/HowItWorks';
-import { DEMO_SCENARIOS } from './data/mockData';
 
 const STORAGE_KEY = 'trustlens_threat_history_v1';
 
@@ -12,34 +11,18 @@ export default function App() {
   const [forceMock, setForceMock] = useState(false);
   const [activeResult, setActiveResult] = useState(null);
 
-  // Initialize history from localStorage or seed with demo samples
+  // Keep history empty until a scan is actually submitted.
   const [history, setHistory] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
       console.warn('Failed to parse history from localStorage:', e);
     }
-    // Seed initial demo history for high-fidelity evaluation
-    return [
-      {
-        ...DEMO_SCENARIOS[0].result,
-        created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-      },
-      {
-        ...DEMO_SCENARIOS[1].result,
-        created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-      },
-      {
-        ...DEMO_SCENARIOS[2].result,
-        created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-      }
-    ];
+    return [];
   });
 
   // Save history updates to localStorage
@@ -113,6 +96,11 @@ export default function App() {
         {activePage === 'how-it-works' && (
           <HowItWorks setActivePage={handleNavChange} />
         )}
+
+        <footer className="border-t border-slate-800/80 bg-midnight-950/70 px-4 py-5 text-center text-base leading-relaxed text-slate-300">
+          TrustLens provides educational guidance. Demo and offline heuristic
+          outputs are simulated, not verified security verdicts.
+        </footer>
       </main>
     </div>
   );

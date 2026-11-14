@@ -30,5 +30,18 @@
 
 ## Build Progress
 
+- [x] **Task 0 — Contract Lock:** Signed off on `shared/sample-threat.json`,
+  strictly defining the Single Source of Truth schema with Pydantic v2 models.
 - [x] **Task 1 — Walking Skeleton:** Added the FastAPI `/api/health` endpoint,
   configured local frontend CORS, and documented backend setup and testing.
+- [x] **Task 2a — Frontend Screen States:** Completed the responsive analysis
+  workspace, text/URL/image input tabs, scanning radar, threat results and
+  explainability panels; added four mock scenarios, accessible checklist and
+  share actions, explicit empty/offline states, and the universal disclaimer.
+- [x] **Task 3 — Backend Core:** Authored `backend/schemas.py`, established
+  full CORS origin support for local Vite development, authored contract invariance
+  test suite in `tests/test_contract.py`.
+- [x] **Task 5 — Integration Join:** Implemented `POST /api/analyze` (with `/api/analyze/url`
+  and `/api/analyze/text` aliases) orchestrating media extraction (Member 4), deterministic
+  heuristics (Member 3 / offline fallback), and Gemini AI intent analysis (Member 4)
+  with sub-2.5s latency, graceful degradation, and composite risk synthesis.

@@ -40,6 +40,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
       <div className="flex items-center gap-2">
         <button
           onClick={() => setShowModal(true)}
+          aria-label={`${forceMock ? 'Demo mock engine selected' : backendState.online ? 'Backend online' : 'Backend offline'}. Open backend settings`}
           className={`group flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
             isLive
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
@@ -47,7 +48,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
                 ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
                 : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
           }`}
-          title="Click to view Backend API telemetry & settings"
+          title="Click to view backend status and API settings"
         >
           <span className="relative flex h-2 w-2">
             <span
@@ -61,7 +62,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
               }`}
             />
           </span>
-          <span className="font-mono">
+          <span className="hidden font-mono sm:inline">
             {forceMock
               ? 'Demo Mock Engine'
               : backendState.online
@@ -80,7 +81,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
                 <Server className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-semibold text-white text-base">Backend & Telemetry Integration</h3>
+                <h3 className="font-semibold text-white text-base">Backend Status & API Settings</h3>
               </div>
               <button
                 onClick={() => setShowModal(false)}
@@ -101,7 +102,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-white text-sm">
-                      {backendState.online ? 'Live Threat Intelligence Backend Online' : 'Threat Intelligence Backend Unreachable'}
+                      {backendState.online ? 'Backend health endpoint online' : 'Backend health endpoint unreachable'}
                     </span>
                     <button
                       onClick={pingBackend}
@@ -115,7 +116,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
                   <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                     {backendState.online
                       ? `Successfully connected to health probe at ${API_BASE_URL}/api/health.`
-                      : `No server responding at ${API_BASE_URL}. TrustLens is actively using the intelligent client-side heuristic engine for full demo functionality.`}
+                      : `No server responding at ${API_BASE_URL}. Only explicitly labeled local demo heuristics are available; no AI threat analysis is running.`}
                   </p>
                   {backendState.lastChecked && (
                     <span className="text-[11px] font-mono text-slate-500 mt-2 block">
@@ -138,10 +139,10 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-white">Live First</span>
+                      <span className="font-semibold text-white">Backend first</span>
                       {!forceMock && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
                     </div>
-                    <span className="text-[11px] text-slate-400">Prefers real API, falls back if offline</span>
+                    <span className="text-[11px] text-slate-400">Try the configured API, then clearly label any local fallback</span>
                   </button>
                   <button
                     onClick={() => setForceMock(true)}
@@ -152,10 +153,10 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-white">Always Mock</span>
+                      <span className="font-semibold text-white">Demo only</span>
                       {forceMock && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
                     </div>
-                    <span className="text-[11px] text-slate-400">Zero network, predictable demo data</span>
+                    <span className="text-[11px] text-slate-400">No network requests; local heuristics and preset fixtures only</span>
                   </button>
                 </div>
               </div>
@@ -174,11 +175,11 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
                   </div>
                   <div className="flex justify-between text-slate-400">
                     <span>Text Analysis:</span>
-                    <span className="text-cyan-300">POST /api/analyze/text</span>
+                    <span className="text-cyan-300">POST /api/analyze (text)</span>
                   </div>
                   <div className="flex justify-between text-slate-400">
                     <span>URL Analysis:</span>
-                    <span className="text-cyan-300">POST /api/analyze/url</span>
+                    <span className="text-cyan-300">POST /api/analyze (URL)</span>
                   </div>
                 </div>
               </div>
@@ -187,7 +188,7 @@ export default function BackendStatus({ forceMock, setForceMock, onStatusChange 
               <div className="text-xs text-slate-400 bg-slate-900/50 p-3 rounded-lg border border-slate-800 flex items-start gap-2">
                 <ShieldAlert className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                 <span>
-                  TrustLens never fabricates backend connection status. Mock analysis is explicitly marked as simulated client heuristics.
+                  A successful health check confirms only that the server responds. It does not confirm the analysis API or an AI model is available. Local fallback output is simulated heuristics, not AI detection.
                 </span>
               </div>
             </div>

@@ -22,9 +22,11 @@ export default function Navbar({ activePage, setActivePage, forceMock, setForceM
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Brand Identity */}
-          <div 
+          <button
+            type="button"
+            aria-label="TrustLens dashboard"
             onClick={() => handleNavClick('dashboard')}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group text-left"
           >
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/30 border border-cyan-500/40 shadow-sm shadow-cyan-500/20 group-hover:border-cyan-400 transition-all">
               <Shield className="w-5 h-5 text-cyan-400 group-hover:scale-105 transition-transform" />
@@ -43,7 +45,7 @@ export default function Navbar({ activePage, setActivePage, forceMock, setForceM
                 See Through the Scam.
               </p>
             </div>
-          </div>
+          </button>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
@@ -79,7 +81,7 @@ export default function Navbar({ activePage, setActivePage, forceMock, setForceM
             {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
+              className="md:hidden min-h-12 min-w-12 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -98,7 +100,7 @@ export default function Navbar({ activePage, setActivePage, forceMock, setForceM
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition ${
+                className={`min-h-12 w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition ${
                   isActive
                     ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/50'

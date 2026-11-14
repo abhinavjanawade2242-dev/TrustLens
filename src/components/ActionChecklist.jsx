@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CheckSquare, Square, CheckCircle2, ShieldCheck, Download, Share2, RefreshCw } from 'lucide-react';
+import { CheckSquare, Square, CheckCircle2, Download } from 'lucide-react';
 
-export default function ActionChecklist({ actions = [], threatLevel = 'SAFE' }) {
+export default function ActionChecklist({ actions = [], threatLevel = 'SAFE', riskScore = 0, analysisSource = 'unknown' }) {
   // Store completed items by index/title
   const [completedMap, setCompletedMap] = useState({});
 
@@ -40,9 +40,25 @@ ${pendingActions.map(i => `[ ] ${i.act}`).join('\n') || 'All actions completed!'
     const a = document.createElement('a');
     a.href = url;
     a.download = `trustlens-action-checklist-${Date.now()}.txt`;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 1000);
   };
+
+  const sourceLabel = analysisSource === 'backend'
+    ? 'backend result'
+    : analysisSource === 'demo'
+      ? 'preset demo'
+      : analysisSource === 'mock'
+        ? 'local heuristic'
+          : analysisSource === 'backend-heuristic'
+            ? 'backend heuristic fallback'
+          : 'saved result with unknown source';
+  const shareMessage = `TrustLens ${sourceLabel} returned ${threatLevel} (${Math.min(100, Math.max(0, Number(riskScore) || 0))}/100). This is an automated result, not a verified security verdict. Avoid unexpected links and verify requests through an official channel.`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
 
   return (
     <div className="rounded-2xl bg-midnight-900/80 border border-slate-800/80 p-6 lg:p-8 shadow-xl">
@@ -64,14 +80,33 @@ ${pendingActions.map(i => `[ ] ${i.act}`).join('\n') || 'All actions completed!'
 
         {/* Progress & Export Buttons */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
-            title="Download printable action plan"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export Plan</span>
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Share a general TrustLens safety notice on WhatsApp"
+              className="flex min-h-12 items-center gap-2 px-3 rounded-lg text-sm font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition"
+            >
+              <span>Share safety notice on WhatsApp</span>
+            </a>
+            <a
+              href="tel:1930"
+              aria-label="Call India's cybercrime helpline 1930"
+              className="flex min-h-12 items-center gap-2 px-3 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            >
+              <span>Call cybercrime helpline 1930</span>
+            </a>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="flex min-h-12 items-center gap-2 px-3 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+              title="Download printable action plan"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export Plan</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -106,14 +141,16 @@ ${pendingActions.map(i => `[ ] ${i.act}`).join('\n') || 'All actions completed!'
           {pendingActions.length > 0 ? (
             <div className="space-y-2">
               {pendingActions.map(({ act, idx }) => (
-                <div
+                <button
+                  type="button"
                   key={idx}
                   onClick={() => toggleAction(idx)}
-                  className="group flex items-start gap-3 p-3.5 rounded-xl bg-midnight-850/80 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800/50 cursor-pointer transition text-sm text-slate-200 select-none"
+                  aria-pressed={Boolean(completedMap[idx])}
+                  className="group flex min-h-12 w-full items-start gap-3 p-3.5 rounded-xl bg-midnight-850/80 border border-slate-800 hover:border-cyan-500/40 hover:bg-slate-800/50 cursor-pointer transition text-left text-base text-slate-200 select-none"
                 >
                   <Square className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 shrink-0 mt-0.5 transition-colors" />
                   <span className="leading-snug">{act}</span>
-                </div>
+                </button>
               ))}
             </div>
           ) : (
@@ -132,14 +169,16 @@ ${pendingActions.map(i => `[ ] ${i.act}`).join('\n') || 'All actions completed!'
             </span>
             <div className="space-y-2">
               {completedActions.map(({ act, idx }) => (
-                <div
+                <button
+                  type="button"
                   key={idx}
                   onClick={() => toggleAction(idx)}
-                  className="flex items-start gap-3 p-3 rounded-xl bg-midnight-950 border border-emerald-500/20 text-xs text-slate-400 cursor-pointer hover:bg-slate-900 line-through select-none"
+                  aria-pressed={Boolean(completedMap[idx])}
+                  className="flex min-h-12 w-full items-start gap-3 p-3 rounded-xl bg-midnight-950 border border-emerald-500/20 text-left text-xs text-slate-400 cursor-pointer hover:bg-slate-900 line-through select-none"
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span className="leading-snug">{act}</span>
-                </div>
+                </button>
               ))}
             </div>
           </div>

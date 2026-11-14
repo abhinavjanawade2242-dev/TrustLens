@@ -1,0 +1,47 @@
+{
+  "scan_id": "scan_fixture_t03_smishing",
+  "threat_level": "SUSPICIOUS",
+  "risk_score": 68,
+  "summary_verdict": "Unclaimed Package Smishing & Address Redirection",
+  "plain_english_explanation": "This message claims an unverified package is awaiting delivery and redirects to a high-abuse disposable TLD domain designed to capture personal addresses and credit card details.",
+  "target_impersonated": "Postal Carrier Service",
+  "submitted_content": "USPS Alert: Package delivery pending due to incorrect house number. Confirm your street address within 12 hours: https://delivery-tracking-portal.xyz/update",
+  "created_at": "2026-11-14T06:10:00Z",
+  "url_analysis": {
+    "submitted_url": "https://delivery-tracking-portal.xyz/update",
+    "actual_domain": "delivery-tracking-portal.xyz",
+    "is_spoofed": false,
+    "lookalike_brand": null,
+    "character_substitution": null,
+    "https_status": {
+      "present": true,
+      "note": "Uses standard SSL encryption."
+    },
+    "heuristic_flags": [
+      "Domain uses high-abuse disposable TLD (.xyz)."
+    ]
+  },
+  "ai_social_engineering": {
+    "urgency_level": "MODERATE",
+    "tactics_detected": [
+      "Fake Package Delivery Lure",
+      "Artificial Deadline ('within 12 hours')"
+    ],
+    "highlighted_quotes": [
+      "Confirm your street address within 12 hours"
+    ],
+    "manipulation_pattern": "Smishing Postal Lure",
+    "evidence_level": "Heuristic Flag Signal"
+  },
+  "why_dangerous": [
+    {
+      "title": "Untrusted TLD Destination",
+      "description": "Domain registered on .xyz commonly associated with bulk disposable spam campaigns.",
+      "severity": "HIGH"
+    }
+  ],
+  "recommended_actions": [
+    "Do NOT click the SMS link.",
+    "Cross-reference the tracking code directly on the official postal website."
+  ]
+}
