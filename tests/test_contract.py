@@ -188,3 +188,29 @@ def test_empty_input_returns_422():
     assert response.status_code == 422
     err_data = response.json()
     assert "detail" in err_data
+
+
+@pytest.mark.parametrize(
+    "fixture_name, expected_threat_level",
+    [
+        ("t01_ceo_fraud.json", ThreatLevel.CRITICAL),
+        ("t02_typosquat_paypal.json", ThreatLevel.CRITICAL),
+        ("t03_package_smishing.json", ThreatLevel.SUSPICIOUS),
+        ("t04_clean_email.json", ThreatLevel.SAFE),
+    ],
+)
+def test_shared_scam_fixtures_validate_contract(fixture_name, expected_threat_level):
+    """Verify all shared scam fixtures strictly conform to ThreatAnalysisResponse."""
+    fixture_path = Path("tests/fixtures") / fixture_name
+    assert fixture_path.exists(), f"Fixture {fixture_name} must exist"
+
+    with open(fixture_path, "r", encoding="utf-8") as f:
+        payload = json.load(f)
+
+    threat = ThreatAnalysisResponse.model_validate(payload)
+    assert threat.threat_level == expected_threat_level
+    assert 0 <= threat.risk_score <= 100
+    assert len(threat.summary_verdict) > 0
+    assert len(threat.plain_english_explanation) > 0
+    assert len(threat.recommended_actions) > 0
+

@@ -1,0 +1,48 @@
+{
+  "scan_id": "scan_fixture_t02_paypal",
+  "threat_level": "CRITICAL",
+  "risk_score": 92,
+  "summary_verdict": "Deceptive Brand Typosquatting & Credential Harvesting",
+  "plain_english_explanation": "The domain 'paypa1-security-center.com' employs character substitution ('1' for 'l') to mimic PayPal and steal login credentials.",
+  "target_impersonated": "paypal",
+  "submitted_content": "Your PayPal account has been limited due to suspicious activity. Verify identity: https://paypa1-security-center.com/login",
+  "created_at": "2026-11-14T06:05:00Z",
+  "url_analysis": {
+    "submitted_url": "https://paypa1-security-center.com/login",
+    "actual_domain": "paypa1-security-center.com",
+    "is_spoofed": true,
+    "lookalike_brand": "paypal",
+    "character_substitution": "Levenshtein edit distance of 1 between 'paypa1' and brand 'paypal'",
+    "https_status": {
+      "present": true,
+      "note": "Uses standard SSL encryption."
+    },
+    "heuristic_flags": [
+      "Typosquatting detected: 'paypa1' mimics legitimate brand 'paypal'."
+    ]
+  },
+  "ai_social_engineering": {
+    "urgency_level": "HIGH",
+    "tactics_detected": [
+      "Account Restriction Threat",
+      "Credential Harvesting Solicitation"
+    ],
+    "highlighted_quotes": [
+      "Your PayPal account has been limited"
+    ],
+    "manipulation_pattern": "Brand Impersonation Lure",
+    "evidence_level": "Deterministic + AI Verification"
+  },
+  "why_dangerous": [
+    {
+      "title": "Brand Trademark Typosquatting",
+      "description": "Host substitutes character '1' for letter 'l' to deceive hurried users into surrendering financial credentials.",
+      "severity": "CRITICAL"
+    }
+  ],
+  "recommended_actions": [
+    "DO NOT click the link or enter your login credentials.",
+    "Navigate directly to paypal.com in your web browser.",
+    "Report the spoofed URL to spoof@paypal.com."
+  ]
+}

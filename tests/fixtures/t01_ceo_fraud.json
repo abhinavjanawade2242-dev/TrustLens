@@ -1,0 +1,37 @@
+{
+  "scan_id": "scan_fixture_t01_ceo",
+  "threat_level": "CRITICAL",
+  "risk_score": 95,
+  "summary_verdict": "Executive Impersonation & Urgent Wire Fraud",
+  "plain_english_explanation": "This email impersonates executive leadership demanding an immediate confidential wire transfer under an artificial deadline to bypass standard corporate accounting controls.",
+  "target_impersonated": "Executive Management",
+  "submitted_content": "URGENT: I am in an executive board meeting. I need an immediate confidential wire of $24,500 processed for vendor acquisition. Do not call my phone, reply directly to this email with wire confirmation.",
+  "created_at": "2026-11-14T06:00:00Z",
+  "url_analysis": null,
+  "ai_social_engineering": {
+    "urgency_level": "EXTREME",
+    "tactics_detected": [
+      "Authority Intimidation",
+      "Channel Isolation ('Do not call my phone')",
+      "Immediate Financial Coercion"
+    ],
+    "highlighted_quotes": [
+      "I need an immediate confidential wire of $24,500",
+      "Do not call my phone, reply directly to this email"
+    ],
+    "manipulation_pattern": "CEO Wire Fraud",
+    "evidence_level": "High Confidence Intent Pattern"
+  },
+  "why_dangerous": [
+    {
+      "title": "Bypasses Fiscal Governance Controls",
+      "description": "Exploits perceived executive hierarchy to coerce immediate financial departure from standard approval protocols.",
+      "severity": "CRITICAL"
+    }
+  ],
+  "recommended_actions": [
+    "DO NOT execute the wire transfer or disclose banking details.",
+    "Verify the request through an established internal out-of-band communication channel.",
+    "Report the message to your organization's IT Security / SOC team."
+  ]
+}

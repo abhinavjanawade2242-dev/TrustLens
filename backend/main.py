@@ -23,6 +23,8 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, sta
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from backend.config import ALLOWED_ORIGINS
+from backend.safety.heuristics import evaluate_url, evaluate_text_cues
 from backend.schemas import (
     AiSocialEngineering,
     AnalyzeRequest,
@@ -47,10 +49,10 @@ app = FastAPI(
     description="Central Orchestration Engine for Digital Scam & Phishing Detection",
 )
 
-# Configure CORS Middleware allowing local frontend and wildcard
+# Configure CORS Middleware allowing local frontend and configured origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -280,19 +282,14 @@ def _run_full_pipeline(
         combined_content = f"{combined_content} {effective_url}".strip()
 
     # ------------------------------------------------------------------------
-    # Step 2: Layer 1 Deterministic Heuristics (Member 3 / Local Engine)
+    # Step 2: Layer 1 Deterministic Heuristics (Member 3)
     # ------------------------------------------------------------------------
     heuristic_data: Optional[Dict[str, Any]] = None
-    text_heuristics = _compute_offline_text_heuristics(combined_content) if combined_content else {"score": 0, "cues": [], "quotes": []}
+    text_heuristics = evaluate_text_cues(combined_content) if combined_content else {"score": 0, "cues": [], "quotes": []}
 
     if effective_url or _extract_urls_from_text(combined_content):
         eval_target = effective_url or _extract_urls_from_text(combined_content)[0]
-        try:
-            # Attempt to use Member 3's heuristics module if available
-            from backend.safety.heuristics import evaluate_url  # type: ignore
-            heuristic_data = evaluate_url(eval_target)
-        except Exception:
-            heuristic_data = _compute_offline_heuristics(eval_target)
+        heuristic_data = evaluate_url(eval_target)
 
     heuristic_score = heuristic_data.get("heuristic_score", 0) if heuristic_data else 0
     # Blend with text heuristic score if text triggers were found
@@ -322,22 +319,20 @@ def _run_full_pipeline(
         else:
             ai_result = client.analyze_text(text=combined_content or effective_url or "Analysis payload")
 
-        ai_score = ai_result.confidence_score
-        summary_verdict = ai_result.summary_verdict
-        plain_english_explanation = ai_result.plain_english_explanation
-        target_impersonated = target_impersonated or ai_result.primary_brand_target
+        score_val = getattr(ai_result, "confidence_score", 0.5)
+        ai_score = int(score_val * 100) if score_val <= 1.0 else int(score_val)
+        summary_verdict = getattr(ai_result, "summary", "") or getattr(ai_result, "summary_verdict", "")
+        plain_english_explanation = summary_verdict
+        target_impersonated = target_impersonated or getattr(ai_result, "primary_brand_target", None)
 
         # Map AI tactics and quotes
-        tactics_detected = [finding.explanation for finding in ai_result.tactics_identified]
+        findings = getattr(ai_result, "detected_techniques", []) or getattr(ai_result, "tactics_identified", [])
+        tactics_detected = [getattr(f, "explanation", str(f)) for f in findings]
         highlighted_quotes = [
-            {
-                "quote": finding.evidence_quote,
-                "category": finding.technique.value,
-                "reason": finding.explanation,
-            }
-            if finding.evidence_quote else finding.explanation
-            for finding in ai_result.tactics_identified
-        ]
+            getattr(f, "evidence_quote", "")
+            for f in findings
+            if getattr(f, "evidence_quote", "")
+        ] or getattr(ai_result, "suspicious_quotes", [])
         urgency_level = UrgencyLevel.HIGH if ai_score >= 70 else (
             UrgencyLevel.MODERATE if ai_score >= 35 else UrgencyLevel.NONE
         )
