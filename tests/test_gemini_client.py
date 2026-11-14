@@ -115,7 +115,7 @@ class TestGeminiPhishGuardClient:
     def test_initialization_with_key_and_defaults(self):
         client = GeminiPhishGuardClient(api_key="TEST_KEY_12345")
         assert client.api_key == "TEST_KEY_12345"
-        assert client.model == "gemini-2.5-flash"
+        assert client.model == "gemini-3.5-flash-lite"
         assert len(client.system_prompt) > 100
         assert "PhishGuard AI" in client.system_prompt
 
