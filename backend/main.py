@@ -58,6 +58,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def normalize_slashes_middleware(request: Request, call_next):
+    """Normalizes consecutive slashes (e.g. //api/health -> /api/health) to guard against misconfigured base URLs."""
+    raw_path = request.scope.get("path", "")
+    if "//" in raw_path:
+        request.scope["path"] = re.sub(r"/+", "/", raw_path)
+    return await call_next(request)
+
 # Top 50 Targeted Brands for Typosquatting Matcher
 TOP_BRANDS = [
     "paypal", "google", "microsoft", "apple", "amazon", "netflix", "facebook",
