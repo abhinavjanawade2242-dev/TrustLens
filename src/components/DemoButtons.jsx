@@ -12,7 +12,7 @@ export default function DemoButtons({ onSelectDemo, isLoading }) {
             Interactive Test Scenarios
           </h3>
         </div>
-        <span className="text-[11px] text-slate-400">1-click automated evaluation</span>
+        <span className="text-[11px] text-slate-400">Preset demonstration results</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">

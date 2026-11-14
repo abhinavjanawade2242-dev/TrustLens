@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckSquare, Square, CheckCircle2, Download } from 'lucide-react';
 
-export default function ActionChecklist({ actions = [], threatLevel = 'SAFE', riskScore = 0 }) {
+export default function ActionChecklist({ actions = [], threatLevel = 'SAFE', riskScore = 0, analysisSource = 'unknown' }) {
   // Store completed items by index/title
   const [completedMap, setCompletedMap] = useState({});
 
@@ -40,11 +40,24 @@ ${pendingActions.map(i => `[ ] ${i.act}`).join('\n') || 'All actions completed!'
     const a = document.createElement('a');
     a.href = url;
     a.download = `trustlens-action-checklist-${Date.now()}.txt`;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 1000);
   };
 
-  const shareMessage = `TrustLens flagged a message as ${threatLevel} (${Math.min(100, Math.max(0, Number(riskScore) || 0))}/100). Avoid unexpected links and verify requests through an official channel. TrustLens provides automated risk analysis and educational guidance. It does not replace official banking verification or professional cybersecurity advice.`;
+  const sourceLabel = analysisSource === 'backend'
+    ? 'backend result'
+    : analysisSource === 'demo'
+      ? 'preset demo'
+      : analysisSource === 'mock'
+        ? 'local heuristic'
+          : analysisSource === 'backend-heuristic'
+            ? 'backend heuristic fallback'
+          : 'saved result with unknown source';
+  const shareMessage = `TrustLens ${sourceLabel} returned ${threatLevel} (${Math.min(100, Math.max(0, Number(riskScore) || 0))}/100). This is an automated result, not a verified security verdict. Avoid unexpected links and verify requests through an official channel.`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
 
   return (

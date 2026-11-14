@@ -53,10 +53,10 @@ export default function QuoteHighlighter({ originalText = '', quotes = EMPTY_QUO
           <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
           <div>
             <span className="font-semibold text-white text-sm block">
-              No High-Risk Phrases Detected
+              No Highlighted Phrases in This Result
             </span>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              The NLP extractor scanned the submitted communication and found no overt urgent phrases, panic keywords, or direct solicitations for passwords/credentials.
+              This result contains no quote-level flags. That does not prove the message is safe; verify the sender and destination independently.
             </p>
           </div>
         </div>

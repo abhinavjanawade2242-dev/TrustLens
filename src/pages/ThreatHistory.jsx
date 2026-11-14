@@ -81,6 +81,11 @@ export default function ThreatHistory({ history = [], onClearHistory, onSelectHi
         </p>
       </div>
 
+      <p className="text-xs leading-relaxed text-slate-400">
+        Demo and offline heuristic results are labeled as simulated. Items with
+        no source label were saved before source tracking was added.
+      </p>
+
       {/* Controls: Search & Filter Tabs */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
@@ -95,7 +100,7 @@ export default function ThreatHistory({ history = [], onClearHistory, onSelectHi
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto p-1 bg-midnight-950 rounded-xl border border-slate-800">
-          {['ALL', 'CRITICAL', 'SUSPICIOUS', 'SAFE'].map((lvl) => (
+          {['ALL', 'CRITICAL', 'SUSPICIOUS', 'SAFE', 'UNASSESSED'].map((lvl) => (
             <button
               key={lvl}
               onClick={() => setFilterLevel(lvl)}
@@ -136,14 +141,24 @@ export default function ThreatHistory({ history = [], onClearHistory, onSelectHi
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((item) => {
-            const threatLevel = item.threat_level || 'SAFE';
-            const riskScore = item.risk_score ?? 0;
-            const details = getRiskDetails(threatLevel, riskScore);
+          {filtered.map((item, index) => {
+            const isPartial = item.analysis_status === 'partial';
+            const isUnassessed = isPartial || item.analysis_status === 'unavailable';
+            const riskScore = item.risk_score;
+            const details = isUnassessed
+              ? {
+                  borderSubtle: 'rgba(148, 163, 184, 0.25)',
+                  badgeBg: 'bg-slate-500/15',
+                  badgeBorder: 'border-slate-500/40',
+                  badgeText: 'text-slate-300',
+                  color: '#94a3b8',
+                  shortLabel: isPartial ? 'PARTIAL ANALYSIS' : 'NOT ANALYZED',
+                }
+              : getRiskDetails(item.threat_level || 'SAFE', riskScore ?? 0);
 
             return (
               <div
-                key={item.scan_id || Math.random()}
+                key={item.scan_id || `${item.created_at || 'scan'}-${index}`}
                 onClick={() => handleOpenResult(item)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
@@ -157,9 +172,22 @@ export default function ThreatHistory({ history = [], onClearHistory, onSelectHi
               >
                 <div className="space-y-2 flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-2 py-0.5 rounded border border-slate-700 bg-slate-800 text-[10px] font-mono text-slate-300">
+                      {isUnassessed
+                        ? details.shortLabel
+                        : item.analysis_source === 'backend'
+                        ? 'BACKEND RESULT'
+                        : item.analysis_source === 'backend-heuristic'
+                          ? 'BACKEND HEURISTIC'
+                        : item.analysis_source === 'demo'
+                          ? 'SIMULATED DEMO'
+                          : item.analysis_source === 'mock'
+                            ? 'SIMULATED HEURISTIC'
+                            : 'SOURCE NOT RECORDED'}
+                    </span>
                     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${details.badgeBg} ${details.badgeBorder} ${details.badgeText}`}>
                       <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: details.color }} />
-                      <span>{details.shortLabel} ({riskScore}/100)</span>
+                      <span>{isUnassessed ? details.shortLabel : `${details.shortLabel} (${riskScore ?? 0}/100)`}</span>
                     </span>
                     <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
                       <Clock className="w-3 h-3" />

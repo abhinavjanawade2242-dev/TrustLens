@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import InputTabs from '../components/InputTabs';
 import ScannerRadar from '../components/ScannerRadar';
 import ThreatCard from '../components/ThreatCard';
@@ -34,10 +34,17 @@ export default function Dashboard({
   setActiveResult 
 }) {
   const [isScanning, setIsScanning] = useState(false);
-  const [scanSource, setScanSource] = useState('mock'); // 'backend' | 'mock'
+  const [isDemoScan, setIsDemoScan] = useState(false);
+  const [scanSource, setScanSource] = useState('mock'); // 'backend' | 'mock' | 'demo' | 'unknown'
   const [errorNotice, setErrorNotice] = useState(null);
   const abortControllerRef = useRef(null);
   const workspaceRef = useRef(null);
+
+  useEffect(() => {
+    if (activeResult) {
+      setScanSource(activeResult.analysis_source || 'unknown');
+    }
+  }, [activeResult]);
 
   const scrollToWorkspace = () => {
     workspaceRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -46,6 +53,7 @@ export default function Dashboard({
   const handleStartAnalysis = async ({ type, content, file, forceDemoResult = null }) => {
     setErrorNotice(null);
     setIsScanning(true);
+    setIsDemoScan(Boolean(forceDemoResult));
     abortControllerRef.current = new AbortController();
 
     if (forceDemoResult) {
@@ -63,10 +71,11 @@ export default function Dashboard({
           ...forceDemoResult,
           scan_id: `scan_${Date.now().toString(36)}`,
           created_at: new Date().toISOString(),
+          analysis_source: 'demo',
         };
 
         setActiveResult(newResult);
-        setScanSource('mock');
+        setScanSource('demo');
         setIsScanning(false);
         if (onSaveScanToHistory) {
           onSaveScanToHistory(newResult);
@@ -93,12 +102,16 @@ export default function Dashboard({
         signal: abortControllerRef.current.signal,
       });
 
-      setActiveResult(response.data);
+      const result = {
+        ...response.data,
+        analysis_source: response.source,
+      };
+      setActiveResult(result);
       setScanSource(response.source);
       setIsScanning(false);
 
       if (onSaveScanToHistory) {
-        onSaveScanToHistory(response.data);
+        onSaveScanToHistory(result);
       }
 
       setTimeout(() => {
@@ -139,7 +152,7 @@ export default function Dashboard({
         <div className="relative z-10 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>AI Threat Telemetry & Multi-Vector Scam Defense</span>
+            <span>Multi-Vector Scam Awareness Workspace</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
@@ -175,8 +188,12 @@ export default function Dashboard({
         </div>
       </section>
 
-      {/* 2. TELEMETRY & SAMPLE STATISTICS */}
+      {/* 2. PRODUCT CAPABILITIES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <p className="mb-3 text-xs leading-relaxed text-slate-400">
+          Product capabilities and demo fixtures only — no live threat telemetry,
+          model accuracy, or real-world scan totals are displayed.
+        </p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {TELEMETRY_METRICS.map((metric, idx) => (
             <div
@@ -228,8 +245,7 @@ export default function Dashboard({
         {/* Input Tabs Component */}
         <InputTabs 
           onAnalyze={handleStartAnalysis} 
-          isLoading={isScanning} 
-          isBackendOnline={!forceMock} 
+          isLoading={isScanning}
         />
 
         {/* Error Notice Card */}
@@ -252,7 +268,7 @@ export default function Dashboard({
       {/* 5. LIVE SCANNING RADAR */}
       {isScanning && (
         <section className="max-w-4xl mx-auto px-4">
-          <ScannerRadar onCancel={handleCancelScan} isMock={forceMock || scanSource === 'mock'} />
+          <ScannerRadar onCancel={handleCancelScan} isMock={forceMock || isDemoScan} />
         </section>
       )}
 
@@ -276,55 +292,84 @@ export default function Dashboard({
       <div id="threat-results-anchor" />
       {activeResult && !isScanning && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          {scanSource === 'mock' && (
+          {scanSource !== 'backend' && activeResult.analysis_status !== 'unavailable' && activeResult.analysis_status !== 'partial' && (
             <div role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-relaxed text-amber-100">
-              Local demo analysis only — this is not a live security verdict. Do not rely on it to decide whether an unfamiliar message or link is safe.
+              {scanSource === 'demo'
+                ? 'Preset demonstration result — the shown score and findings are fixed sample data, not computed from this submission or by an AI model.'
+                : scanSource === 'mock'
+                  ? 'Local heuristic output only — no AI model evaluated this content. This is not a verified security verdict.'
+                  : scanSource === 'backend-heuristic'
+                    ? 'The backend returned offline heuristic results; no AI model evaluated this content. This is not a verified security verdict.'
+                    : 'The source of this saved result was not recorded. Treat it as unverified.'}
+              {' '}
+              {scanSource === 'demo'
+                ? 'Do not rely on simulated demo data to decide whether a message or link is safe.'
+                : scanSource === 'mock' || scanSource === 'backend-heuristic'
+                  ? 'Treat heuristic results as guidance only; verify the sender and destination independently.'
+                  : 'Verify the sender and destination independently.'}
             </div>
           )}
-          {/* Main Threat Header & Risk Gauge */}
-          <ThreatCard result={activeResult} />
-
-          {/* Signature Feature: Why is this dangerous? */}
-          <WhyDangerous 
-            items={activeResult.why_dangerous} 
-            threatLevel={activeResult.threat_level} 
-          />
-
-          {/* Suspicious Quote Forensic Highlighter */}
-          <QuoteHighlighter 
-            originalText={activeResult.submitted_content} 
-            quotes={activeResult.ai_social_engineering?.highlighted_quotes || []} 
-          />
-
-          {/* URL & Domain Intelligence Panel */}
-          {activeResult.url_analysis && (
-            <UrlAnalysis urlData={activeResult.url_analysis} />
+          {activeResult.analysis_status === 'unavailable' || activeResult.analysis_status === 'partial' ? (
+            <div className="rounded-2xl border border-amber-500/30 bg-midnight-900/90 p-6 text-slate-200">
+              <h2 className="text-xl font-bold text-white">
+                {activeResult.analysis_status === 'partial' ? 'Image analysis incomplete' : 'Image analysis unavailable'}
+              </h2>
+              <p className="mt-2 text-base leading-relaxed">{activeResult.plain_english_explanation}</p>
+              {activeResult.url_analysis?.submitted_url && (
+                <p className="mt-4 break-all text-sm text-cyan-200">
+                  Extracted QR destination: {activeResult.url_analysis.submitted_url}
+                </p>
+              )}
+              {activeResult.url_analysis?.heuristic_flags?.length > 0 && (
+                <ul className="mt-3 list-disc space-y-1 pl-6 text-sm text-slate-300">
+                  {activeResult.url_analysis.heuristic_flags.map((flag) => <li key={flag}>{flag}</li>)}
+                </ul>
+              )}
+              <ul className="mt-4 list-disc space-y-2 pl-6 text-base leading-relaxed">
+                {activeResult.recommended_actions.map((action) => <li key={action}>{action}</li>)}
+              </ul>
+            </div>
+          ) : (
+            <>
+              <ThreatCard result={activeResult} />
+              <WhyDangerous
+                items={activeResult.why_dangerous}
+                threatLevel={activeResult.threat_level}
+              />
+              <QuoteHighlighter
+                originalText={activeResult.submitted_content}
+                quotes={activeResult.ai_social_engineering?.highlighted_quotes || []}
+              />
+              {activeResult.url_analysis && (
+                <UrlAnalysis urlData={activeResult.url_analysis} />
+              )}
+              {activeResult.ai_social_engineering && (
+                <SocialEngineering
+                  socialData={activeResult.ai_social_engineering}
+                  analysisSource={scanSource}
+                />
+              )}
+              <ActionChecklist
+                actions={activeResult.recommended_actions || []}
+                threatLevel={activeResult.threat_level}
+                riskScore={activeResult.risk_score}
+                analysisSource={activeResult.analysis_source}
+              />
+            </>
           )}
-
-          {/* AI Social Engineering Breakdown */}
-          {activeResult.ai_social_engineering && (
-            <SocialEngineering socialData={activeResult.ai_social_engineering} />
-          )}
-
-          {/* Interactive Incident Mitigation Action Checklist */}
-          <ActionChecklist 
-            actions={activeResult.recommended_actions || []} 
-            threatLevel={activeResult.threat_level} 
-            riskScore={activeResult.risk_score}
-          />
         </section>
       )}
 
-      {/* 7. RECENT GLOBAL / SAMPLE SCANS */}
+      {/* 7. ILLUSTRATIVE SAMPLE SCANS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-cyan-400" />
             <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
-              Live Threat Telemetry Feed (Sample Stream)
+              Illustrative Threat Examples
             </h3>
           </div>
-          <span className="text-xs text-slate-400">Demonstrating real-time ingestion</span>
+          <span className="text-xs text-slate-400">Static examples — not current threats or live telemetry</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -339,7 +384,7 @@ export default function Dashboard({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-                    {scan.type}
+                    SAMPLE · {scan.type}
                   </span>
                   <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
                     isCrit
@@ -367,7 +412,7 @@ export default function Dashboard({
 
                 <div className="flex items-center justify-between pt-1 text-[10px] text-slate-500 font-mono">
                   <span>Score: {scan.risk_score}/100</span>
-                  <span>{scan.timestamp}</span>
+                  <span>Illustrative</span>
                 </div>
               </div>
             );

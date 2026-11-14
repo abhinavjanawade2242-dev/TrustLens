@@ -110,11 +110,25 @@ export function normalizeUrl(input) {
   }
   try {
     const parsed = new URL(str);
+    const hostname = parsed.hostname;
+    const isIpv6 = /^\[[\da-f:.]+\]$/i.test(hostname);
+    const labels = hostname.replace(/\.$/, '').split('.');
+    const isValidHostname = isIpv6 || (
+      hostname.length <= 253 &&
+      labels.every((label) =>
+        label.length > 0 &&
+        label.length <= 63 &&
+        /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i.test(label)
+      )
+    );
+    if (!isValidHostname) {
+      throw new TypeError('Invalid hostname');
+    }
     return {
       isValid: true,
       original: input,
       normalized: parsed.href,
-      hostname: parsed.hostname,
+      hostname,
       protocol: parsed.protocol,
       pathname: parsed.pathname,
     };

@@ -1,11 +1,10 @@
 /**
  * TrustLens API Service Layer
  * 
- * Supports both Live Backend API and Local Heuristic Engine.
+ * Supports the documented backend API and an explicitly labeled local heuristic fallback.
  * Follows the strict TrustLens Shared Response Contract.
  */
 
-import { DEMO_SCENARIOS } from '../data/mockData';
 import { normalizeUrl } from '../utils/riskHelpers';
 
 const DEFAULT_API_URL = 'http://localhost:8000';
@@ -71,7 +70,7 @@ export async function analyzeThreat({ type, content, file, forceMock = false, si
   // If not forcing mock, try live backend first
   if (!forceMock) {
     try {
-      const endpoint = type === 'url' ? '/api/analyze/url' : '/api/analyze/text';
+      const endpoint = '/api/analyze';
       
       let body;
       let headers = {};
@@ -79,16 +78,16 @@ export async function analyzeThreat({ type, content, file, forceMock = false, si
       if (type === 'image' && file) {
         // FormData for file upload
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('file', file);
         body = formData;
       } else {
         headers['Content-Type'] = 'application/json';
         headers['Accept'] = 'application/json';
-        body = JSON.stringify({
-          type,
-          content: content?.trim(),
-          submitted_at: new Date().toISOString(),
-        });
+        body = JSON.stringify(
+          type === 'url'
+            ? { url: content?.trim() }
+            : { text: content?.trim() },
+        );
       }
 
       const res = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -100,18 +99,35 @@ export async function analyzeThreat({ type, content, file, forceMock = false, si
 
       if (res.ok) {
         const liveData = await res.json();
+        const data = sanitizeResponse(liveData, content, type);
+        const evidenceLevel = data.ai_social_engineering?.evidence_level || '';
+        const isHeuristicFallback = /offline.*heuristic|heuristic.*offline|fallback/i.test(evidenceLevel);
+
+        if (type === 'image' && isHeuristicFallback) {
+          data.analysis_status = 'partial';
+          data.threat_level = 'UNASSESSED';
+          data.risk_score = null;
+          data.summary_verdict = 'Image analysis is incomplete';
+          data.plain_english_explanation = 'The backend returned offline heuristic results, not AI image analysis. It may have checked an extracted QR destination, but OCR and visual analysis did not run. Do not treat this image as safe.';
+          data.recommended_actions = [
+            'Do not treat this image as safe; its visual content was not analyzed.',
+            'Verify any extracted QR destination independently before opening it.',
+            'Retry when the configured AI image-analysis service is available.'
+          ];
+        }
+
         return {
-          source: 'backend',
-          data: sanitizeResponse(liveData, content, type),
+          source: isHeuristicFallback ? 'backend-heuristic' : 'backend',
+          data,
         };
       }
       // If server returned 404 or 500, fallback or throw
-      console.warn(`[TrustLens] Backend responded with status ${res.status}, falling back to intelligent client-side analyzer.`);
+      console.warn(`[TrustLens] Backend responded with status ${res.status}; falling back to local heuristic analysis.`);
     } catch (err) {
       if (err.name === 'AbortError') {
         throw err; // propagate user cancellation
       }
-      console.warn('[TrustLens] Live backend unreachable, engaging client-side heuristic engine:', err.message);
+      console.warn('[TrustLens] Backend unreachable; using local heuristic analysis:', err.message);
     }
   }
 
@@ -145,7 +161,7 @@ function sanitizeResponse(raw, originalContent, type) {
     threat_level: threatLevel,
     risk_score: riskScore,
     summary_verdict: raw.summary_verdict || 'Threat Evaluation Completed',
-    plain_english_explanation: raw.plain_english_explanation || 'Analysis completed according to security telemetry metrics.',
+    plain_english_explanation: raw.plain_english_explanation || 'Analysis completed; the backend did not provide an explanation.',
     target_impersonated: raw.target_impersonated || (raw.is_spoofed ? 'Unverified Identity' : 'None detected'),
     submitted_content: originalContent || raw.submitted_content || '',
     created_at: raw.created_at || new Date().toISOString(),
@@ -173,57 +189,29 @@ function sanitizeResponse(raw, originalContent, type) {
 }
 
 /**
- * Intelligent Client-Side Heuristic Engine for Demo & Offline Mode
- * Evaluates custom user inputs using pattern matching, NLP heuristics, and domain analysis.
+ * Local heuristic fallback for custom text and URL inputs.
+ * It does not evaluate image contents or run an AI model.
  */
 function runClientSideHeuristicEngine(type, content = '', file = null) {
   const text = (content || '').trim();
-
-  // Check if content matches any demo scenario
-  for (const demo of DEMO_SCENARIOS) {
-    if (demo.sampleInput.trim() === text || text.includes(demo.sampleInput.slice(0, 40))) {
-      return {
-        ...demo.result,
-        scan_id: `scan_${Date.now().toString(36)}`,
-        created_at: new Date().toISOString(),
-      };
-    }
-  }
 
   // Handle Image Upload when backend is unavailable
   if (type === 'image') {
     return {
       scan_id: `scan_img_${Date.now().toString(36)}`,
-      threat_level: "SUSPICIOUS",
-      risk_score: 45,
-      summary_verdict: "Image File Upload Staged (Offline Preview)",
-      plain_english_explanation: "Visual OCR and multimodal neural vision analysis require live backend connection. In local demo mode, the file metadata has been verified and staged for security inspection.",
-      target_impersonated: "Pending OCR parsing",
+      analysis_status: 'unavailable',
+      threat_level: 'UNASSESSED',
+      risk_score: null,
+      summary_verdict: 'Image content not analyzed',
+      plain_english_explanation: 'Image OCR and QR-code inspection require the analysis backend, which is not available. Only the selected file type and size were checked; its contents were not analyzed.',
+      target_impersonated: null,
       submitted_content: file ? `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)` : 'Image asset',
       created_at: new Date().toISOString(),
       url_analysis: null,
-      ai_social_engineering: {
-        urgency_level: "EVALUATION_PENDING",
-        tactics_detected: [
-          "Image-based credential text masking (Potential)",
-          "QR code or embedded link obfuscation (Pending OCR)"
-        ],
-        highlighted_quotes: [],
-        evidence_level: "Client-side metadata inspection",
-        manipulation_pattern: "Visual phishing lures frequently use screenshots or image-only emails to evade text-based spam filters."
-      },
-      why_dangerous: [
-        {
-          title: "Image-Based Filter Evasion",
-          category: "Obfuscation",
-          detected_evidence: `Uploaded asset: ${file?.name || 'Screenshot'}`,
-          explanation: "Adversaries embed fraudulent invoices or QR codes inside images so standard email text gateways cannot inspect the message."
-        }
-      ],
       recommended_actions: [
-        "Do not scan QR codes embedded within unverified images",
-        "Connect live backend for complete neural OCR and visual analysis",
-        "Manually inspect sender email address header"
+        'The image contents have not been analyzed. Do not treat this upload as safe.',
+        'Do not open links or scan QR codes from the image until they are verified.',
+        'Try again when the image-analysis backend is available.'
       ]
     };
   }

@@ -420,8 +420,8 @@ export const RECENT_SAMPLE_SCANS = [
 ];
 
 export const TELEMETRY_METRICS = [
-  { label: 'Threats Analyzed (24h)', value: '18,492', change: '+14% vs avg', note: 'Global telemetry sample' },
-  { label: 'Active Phishing Domains', value: '4,109', change: 'Live index', note: 'Crowdsourced + Heuristic' },
-  { label: 'Average Detection Time', value: '1.2s', change: 'Real-time NLP', note: 'Multi-layer heuristic pipeline' },
-  { label: 'Social Engineering Accuracy', value: '99.4%', change: 'Validated', note: 'Calibrated detection models' },
+  { label: 'Analysis inputs', value: '3', change: 'Text · URL · image', note: 'Available input types' },
+  { label: 'Demo scenarios', value: '4', change: 'Illustrative only', note: 'Fixed sample fixtures' },
+  { label: 'Risk score scale', value: '0–100', change: 'Demo output', note: 'Not a verified probability' },
+  { label: 'Threat history', value: 'Browser', change: 'Local only', note: 'Stored on this device' },
 ];

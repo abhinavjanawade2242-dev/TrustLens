@@ -26,6 +26,15 @@ export default function ThreatCard({ result }) {
   const threatLevel = result.threat_level || 'SAFE';
   const riskScore = result.risk_score ?? 0;
   const details = getRiskDetails(threatLevel, riskScore);
+  const sourceLabel = result.analysis_source === 'backend'
+    ? 'Backend response'
+    : result.analysis_source === 'demo'
+      ? 'Preset demo fixture'
+      : result.analysis_source === 'mock'
+        ? 'Local heuristic; no AI model'
+        : result.analysis_source === 'backend-heuristic'
+          ? 'Backend offline-heuristic fallback'
+        : 'Source not recorded';
 
   const handleCopySummary = () => {
     const text = `[TrustLens Threat Intelligence Report]
@@ -127,7 +136,7 @@ Scan ID: ${result.scan_id || 'N/A'}`;
             className="flex items-center gap-2 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition px-3 py-1.5 rounded-lg hover:bg-cyan-500/10"
           >
             <Terminal className="w-4 h-4" />
-            <span>{showTechnical ? 'Hide Technical Threat Telemetry' : 'Expand Technical Threat Telemetry'}</span>
+            <span>{showTechnical ? 'Hide Analysis Details' : 'Expand Analysis Details'}</span>
             {showTechnical ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
 
@@ -146,7 +155,7 @@ Scan ID: ${result.scan_id || 'N/A'}`;
         {showTechnical && (
           <div className="mt-4 p-4 rounded-xl bg-midnight-950 border border-slate-800 text-xs font-mono space-y-3 animate-fadeIn">
             <div className="flex items-center justify-between text-slate-400 pb-2 border-b border-slate-800">
-              <span className="font-semibold text-slate-300">RAW THREAT INTELLIGENCE CONTRACT TELEMETRY</span>
+              <span className="font-semibold text-slate-300">ANALYSIS RESPONSE DETAILS</span>
               <span className="text-[11px] text-cyan-400">JSON SCHEMA v2.4</span>
             </div>
 
@@ -155,9 +164,9 @@ Scan ID: ${result.scan_id || 'N/A'}`;
             </pre>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-slate-400 text-[11px] pt-1">
-              <div><strong className="text-slate-300">Entropy Level:</strong> Normal</div>
-              <div><strong className="text-slate-300">Scan Model:</strong> Heuristic + NLP Engine</div>
-              <div><strong className="text-slate-300">Integrity:</strong> Signed Telemetry</div>
+              <div><strong className="text-slate-300">Result source:</strong> {sourceLabel}</div>
+              <div><strong className="text-slate-300">Status:</strong> {result.analysis_status || 'Analysis response received'}</div>
+              <div><strong className="text-slate-300">Scan ID:</strong> {result.scan_id || 'Not provided'}</div>
             </div>
           </div>
         )}

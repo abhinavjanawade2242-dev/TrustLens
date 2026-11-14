@@ -15,7 +15,7 @@ import {
   FileCheck
 } from 'lucide-react';
 
-export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
+export default function InputTabs({ onAnalyze, isLoading }) {
   const [activeTab, setActiveTab] = useState('text'); // 'text' | 'url' | 'image'
   
   // Text state
@@ -408,7 +408,7 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
                   </span>
                   <span className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1 justify-center sm:justify-start">
                     <FileCheck className="w-3.5 h-3.5" />
-                    File validated & ready for security pipeline
+                    Image selected; contents are not analyzed locally
                   </span>
                 </div>
                 <button
@@ -435,9 +435,9 @@ export default function InputTabs({ onAnalyze, isLoading, isBackendOnline }) {
               <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
               <div>
                 <span className="font-semibold text-slate-300 block mb-0.5">
-                  Multimodal OCR & Neural Vision Notice:
+                  Image Analysis Availability:
                 </span>
-                Full optical character recognition (OCR) and visual logo tampering detection require an active backend intelligence service. When running in local mock/offline mode, TrustLens performs client-side metadata checks without fabricating fake visual OCR results.
+                The browser does not inspect image contents. When available, the configured backend can inspect images and extract QR destinations. If its AI analysis is unavailable, the result is marked incomplete rather than assigned a safe score. File type and size are checked locally.
               </div>
             </div>
 

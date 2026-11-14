@@ -1,7 +1,7 @@
 import React from 'react';
 import { Brain, Flame, Zap, Shield, AlertOctagon, CheckCircle2, FileText, Info } from 'lucide-react';
 
-export default function SocialEngineering({ socialData }) {
+export default function SocialEngineering({ socialData, analysisSource = 'unknown' }) {
   if (!socialData) return null;
 
   const {
@@ -52,6 +52,15 @@ export default function SocialEngineering({ socialData }) {
 
   const urgencyStyle = getUrgencyBadge(urgency_level);
   const UrgencyIcon = urgencyStyle.icon;
+  const sourceNotice = analysisSource === 'demo'
+    ? 'Fixed sample data; no AI model evaluated this content.'
+    : analysisSource === 'mock'
+      ? 'Local heuristic signals only; no AI model evaluated this content.'
+      : analysisSource === 'backend-heuristic'
+        ? 'Backend offline-heuristic fallback; no AI model evaluated this content.'
+      : analysisSource === 'backend'
+        ? 'Signals returned by the configured analysis backend.'
+        : 'The source for this saved result was not recorded.';
 
   return (
     <div className="rounded-2xl bg-midnight-900/80 border border-slate-800/80 p-6 lg:p-8 shadow-xl">
@@ -63,10 +72,14 @@ export default function SocialEngineering({ socialData }) {
           </div>
           <div>
             <h3 className="text-lg font-bold text-white tracking-tight">
-              AI Social Engineering Analysis
+              {analysisSource === 'demo'
+                ? 'Social Engineering Signals — Demo'
+                : analysisSource === 'backend-heuristic'
+                  ? 'Social Engineering Signals — Heuristic Fallback'
+                  : 'Social Engineering Signals'}
             </h3>
             <p className="text-xs text-slate-400">
-              Psychological manipulation heuristics and persuasion tactic taxonomy
+              {sourceNotice}
             </p>
           </div>
         </div>
@@ -117,7 +130,15 @@ export default function SocialEngineering({ socialData }) {
           <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
             <span className="text-slate-400 flex items-center gap-1.5">
               <Info className="w-3.5 h-3.5 text-cyan-400" />
-              Evidence Confidence Level:
+              {analysisSource === 'demo'
+                ? 'Demo evidence source:'
+                : analysisSource === 'backend'
+                  ? 'Backend evidence level:'
+                  : analysisSource === 'backend-heuristic'
+                    ? 'Backend heuristic evidence source:'
+                    : analysisSource === 'mock'
+                      ? 'Heuristic evidence source:'
+                      : 'Recorded evidence source:'}
             </span>
             <span className="font-mono text-cyan-400 bg-cyan-950/40 px-2.5 py-1 rounded border border-cyan-900/60">
               {evidence_level}
