@@ -1,0 +1,34 @@
+{
+  "scan_id": "scan_2026_001",
+  "threat_level": "CRITICAL",
+  "risk_score": 88,
+  "summary_verdict": "Deceptive Brand Spoof & Credential Harvesting Detected",
+  "plain_english_explanation": "This message is impersonating an established brand to induce panic. The link directs to an unverified domain designed to capture your login credentials.",
+  "target_impersonated": "BrandName",
+  "url_analysis": {
+    "submitted_url": "https://service-notice.example",
+    "actual_domain": "lookalike-domain.example",
+    "is_spoofed": true,
+    "heuristic_flags": [
+      "Typosquatting detected: domain mimics legitimate brand",
+      "Misleading subdomain prepended to disguise root domain"
+    ]
+  },
+  "ai_social_engineering": {
+    "urgency_level": "EXTREME",
+    "tactics_detected": [
+      "Artificial deadline ('within 24 hours')",
+      "Fear of account suspension or financial loss",
+      "Direct request for sensitive login credentials"
+    ],
+    "highlighted_quotes": [
+      "Your account has been restricted",
+      "Verify your identity immediately or funds will be frozen"
+    ]
+  },
+  "recommended_actions": [
+    "DO NOT click the link or enter your credentials.",
+    "Do NOT reply to the sender or call any phone number provided in the text.",
+    "Navigate to the official portal manually in your browser to verify your account status."
+  ]
+}

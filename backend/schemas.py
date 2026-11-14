@@ -4,7 +4,7 @@ Author: Abhinav (Member 2 - Backend & System Orchestrator Lead)
 """
 
 from enum import Enum
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -53,7 +53,7 @@ class AiSocialEngineering(BaseModel):
     model_config = ConfigDict(extra="ignore")
     urgency_level: UrgencyLevel = UrgencyLevel.UNKNOWN
     tactics_detected: List[str] = Field(default_factory=list)
-    highlighted_quotes: List[str] = Field(default_factory=list)
+    highlighted_quotes: List[Union[str, Dict[str, Any]]] = Field(default_factory=list)
     manipulation_pattern: Optional[str] = None
     evidence_level: Optional[str] = "Live Backend Signal"
 
